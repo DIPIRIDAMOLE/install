@@ -1,8 +1,8 @@
 script_name('MoD-Helper')
-script_authors('Xavier Adamson', 'Frapsy', 'Sergey Parhutik', 'DiPi')
+script_authors('Xavier Adamson', 'Frapsy', 'Sergey Parhutik', 'DIPIRIDAMOLE')
 script_description('Ministry of Defence Helper.')
-script_version_number(30)
-script_version("0.3.0")
+script_version_number(39)
+script_version("0.3.9")
 script_properties("work-in-pause")
 
 --memory.fill(sampGetBase() + 0x9D31A, 0x90, 12, true)
@@ -65,11 +65,9 @@ assert(res, 'Library basexx not found')
 local res, fa = pcall(require, 'faIcons')
 assert(res, 'Library faIcons not found')
 
-local memoryfixtune = require "memory"
 -- ---------------------------------------------------------------
 -- local res, effil = pcall(require, 'effil')
 -- assert(res, 'Library effil not found')
-
 
 
 encoding.default = 'CP1251'
@@ -104,6 +102,7 @@ local LocalInfo = ffi.new("char[?]", BuffSize)
 local shell32 = ffi.load 'Shell32'
 local ole32 = ffi.load 'Ole32'
 ole32.CoInitializeEx(nil, 2 + 4)
+
 
 -- свалка переменных
 mlogo, errorPic, classifiedPic, pentagonPic, accessDeniedPic, gameServer, nasosal_rang = nil, nil, nil, nil, nil, nil -- картинки
@@ -146,13 +145,20 @@ mouseCoord = false -- проверка на статус перемещения окна информера
 token = 1 -- токен
 mouseCoord2 = false -- перемещение автостроя
 mouseCoord3 = false -- перемещение координатора
+phpchat = true
 getServerColored = '' -- переменная в которой храним все ники пользователей по серверу для покраса в чате
+
+
+--Secondcolor = 'A7A7A7'
+
+
 
 blackbase = {} -- для черного списка
 names = {} -- для автростроя
 SecNames = {}
 SecNames2 = {}
 
+mass_niki = { '', '' }
 
 -- переменные для шпоры, если не ошибаюсь, то есть лишние
 files							= {}
@@ -189,11 +195,12 @@ local SET = {
 		gangzones = false,
 		zones = false,
 		Zdravia = false,
-		Fixtune = false,
+		FPSunlock = false,
 		MeNuNaX = false,
 		ColorFama = false,
 		assistant = false,
-		tag = '',
+		rtag = '',
+		ftag = '',
 		enable_tag = false,
 		gos1 = '',
 		gos2 = '',
@@ -219,11 +226,28 @@ local SET = {
 		infoY = 0,
 		infoX2 = 0,
 		infoY2 = 0,
+		R = 1,
+		G = 1,
+		B = 1,
+		Theme = 1;
+		SCRIPTCOLOR = 0x046D63;
+		Secondcolor = '00C2BB';
 		spOtr = '',
 		marker = true,
 		gnewstag = 'МО',
 		colornikifama = '',
-		nikifama = '',
+		nikifama1 = '',
+		nikifama2 = '',
+		nikifama3 = '',
+		nikifama4 = '',
+		nikifama5 = '',
+		nikifama6 = '',
+		nikifama7 = '',
+		nikifama8 = '',
+		nikifama9 = '',
+		nikifama10 = '',
+		textprivet = 'Здравия желаю, товарищ',
+		textpriv = 'Здравия желаю',
 		timefix = 3,
 		enableskin = false,
 		skin = 1,
@@ -322,7 +346,10 @@ else
 		[10] = { text = "Принять P.E.S.", v = {} },
 		[11] = { text = "Fuck Pe4enka.", v = {} },
 		[12] = { text = "Снять маркер", v = {} },
-		[13] = { text = "Меню скрипта", v = {} }
+		[13] = { text = "Меню скрипта", v = {} },
+		[14] = { text = "/r", v = {} },
+		[15] = { text = "/f", v = {} },
+		[16] = { text = "/g", v = {} }
 	}
 end
 --sampSetChatInputEnabled(true)
@@ -385,77 +412,6 @@ patch()
 -----------------------------------------------------------------------------------
 
 
-function new_style() -- паблик дизайн андровиры, который юзался в скрипте ранее
-
-	imgui.SwitchContext()
-    local style = imgui.GetStyle()
-    local colors = style.Colors
-    local clr = imgui.Col
-    local ImVec4 = imgui.ImVec4
-    local ImVec2 = imgui.ImVec2
-
-    style.WindowPadding = ImVec2(15, 15)
-    style.WindowRounding = 5.0
-    style.FramePadding = ImVec2(5, 5)
-    style.FrameRounding = 4.0
-    style.ItemSpacing = ImVec2(12, 8)
-    style.ItemInnerSpacing = ImVec2(8, 6)
-    style.IndentSpacing = 25.0
-    style.ScrollbarSize = 15.0
-    style.ScrollbarRounding = 9.0
-    style.GrabMinSize = 5.0
-	style.GrabRounding = 3.0
-	style.WindowTitleAlign = ImVec2(0.5, 0.5)
-
-
-	colors[clr.Text] = ImVec4(0.80, 0.80, 0.83, 1.00)
-    colors[clr.TextDisabled] = ImVec4(0.24, 0.23, 0.29, 1.00)
-    colors[clr.ChildWindowBg] = ImVec4(0.07, 0.07, 0.09, 0.50)
-    colors[clr.PopupBg] = ImVec4(0.07, 0.07, 0.09, 0.80)
-    colors[clr.Border] = ImVec4(0.80, 0.80, 0.83, 0.88)
-    colors[clr.BorderShadow] = ImVec4(0.92, 0.91, 0.88, 0.00)
-	--colors[clr.TitleBgCollapsed] = ImVec4(0.00, 0.00, 0.00, 0.51)
-	colors[clr.TitleBgCollapsed] = ImVec4(0.24, 0.23, 0.29, 1.00)
-    colors[clr.TitleBgActive] = ImVec4(0.07, 0.07, 0.09, 1.00)
-	colors[clr.MenuBarBg] = ImVec4(0.10, 0.09, 0.12, 0.50) 	
-    colors[clr.ScrollbarBg] = ImVec4(0.10, 0.09, 0.12, 1.00)
-    colors[clr.ScrollbarGrab] = ImVec4(0.80, 0.80, 0.83, 0.31)
-    colors[clr.ScrollbarGrabHovered] = ImVec4(0.56, 0.56, 0.58, 1.00)
-    colors[clr.ScrollbarGrabActive] = ImVec4(0.06, 0.05, 0.07, 1.00)
-    colors[clr.ComboBg] = ImVec4(0.19, 0.18, 0.21, 0.50)
-    colors[clr.CheckMark] = ImVec4(0.80, 0.80, 0.83, 0.31)
-    colors[clr.SliderGrab] = ImVec4(0.80, 0.80, 0.83, 0.31)
-    colors[clr.SliderGrabActive] = ImVec4(0.06, 0.05, 0.07, 1.00)
-    colors[clr.Button] = ImVec4(0.10, 0.09, 0.12, 1.00)
-    colors[clr.ButtonHovered] = ImVec4(0.24, 0.23, 0.29, 1.00)
-    colors[clr.ButtonActive] = ImVec4(0.56, 0.56, 0.58, 1.00)
-    colors[clr.Header] = ImVec4(0.10, 0.09, 0.12, 1.00)
-    --colors[clr.HeaderHovered] = ImVec4(0.56, 0.56, 0.58, 1.00)
-    colors[clr.HeaderHovered] = ImVec4(0.24, 0.23, 0.29, 1.00)
-    colors[clr.HeaderActive] = ImVec4(0.06, 0.05, 0.07, 1.00)
-    colors[clr.ResizeGrip] = ImVec4(0.00, 0.00, 0.00, 0.00)
-    colors[clr.ResizeGripHovered] = ImVec4(0.56, 0.56, 0.58, 1.00)
-    colors[clr.ResizeGripActive] = ImVec4(0.06, 0.05, 0.07, 1.00)
-    colors[clr.CloseButton] = ImVec4(0.40, 0.39, 0.38, 0.16)
-    colors[clr.CloseButtonHovered] = ImVec4(0.40, 0.39, 0.38, 0.39)
-    colors[clr.CloseButtonActive] = ImVec4(0.40, 0.39, 0.38, 1.00)
-    colors[clr.PlotLines] = ImVec4(0.40, 0.39, 0.38, 0.63)
-    colors[clr.PlotLinesHovered] = ImVec4(0.25, 1.00, 0.00, 1.00)
-    colors[clr.PlotHistogram] = ImVec4(0.40, 0.39, 0.38, 0.63)
-    colors[clr.PlotHistogramHovered] = ImVec4(0.25, 1.00, 0.00, 1.00)
-    colors[clr.TextSelectedBg] = ImVec4(0.25, 1.00, 0.00, 0.43)
-    --colors[clr.ModalWindowDarkening] = ImVec4(1.00, 0.98, 0.95, 0.70)
-    colors[clr.ModalWindowDarkening] = ImVec4(0.00, 0.00, 0.00, 0.80)
-
-	colors[clr.WindowBg] = ImVec4(0.06, 0.05, 0.07, 0.98)
-    --colors[clr.FrameBg] = ImVec4(0.10, 0.09, 0.12, 1.00)
-    colors[clr.FrameBg] = ImVec4(0.13, 0.12, 0.15, 1.00)
-    colors[clr.FrameBgHovered] = ImVec4(0.24, 0.23, 0.29, 1.00)
-    colors[clr.FrameBgActive] = ImVec4(0.56, 0.56, 0.58, 1.00)
-	colors[clr.TitleBg] = ImVec4(0.10, 0.09, 0.12, 0.50)
-
-end
-
 function apply_custom_style() -- дизайн imgui, цветовая схема уникальная в том плане, что ее нет в сети и сделана руками
 
 	imgui.SwitchContext()
@@ -478,52 +434,405 @@ function apply_custom_style() -- дизайн imgui, цветовая схема уникальная в том п
 	style.GrabRounding = 3.0
 	style.WindowTitleAlign = ImVec2(0.5, 0.5)
 
-	colors[clr.Text] = ImVec4(0.71, 0.94, 0.93, 1.00) 
-	colors[clr.TextDisabled] = ImVec4(0.24, 0.23, 0.29, 1.00) 
-	colors[clr.WindowBg] = ImVec4(0.00, 0.06, 0.08, 0.91) 
-	colors[clr.ChildWindowBg] = ImVec4(0.00, 0.07, 0.07, 0.91) 
-	colors[clr.PopupBg] = ImVec4(0.02, 0.08, 0.09, 0.94) 
-	colors[clr.Border] = ImVec4(0.04, 0.60, 0.55, 0.88) 
-	colors[clr.BorderShadow] = ImVec4(0.92, 0.91, 0.88, 0.00) 
-	colors[clr.FrameBg] = ImVec4(0.02, 0.60, 0.56, 0.49) 
-	colors[clr.FrameBgHovered] = ImVec4(0.10, 0.63, 0.69, 0.72) 
-	colors[clr.FrameBgActive] = ImVec4(0.04, 0.54, 0.60, 1.00) 
-	colors[clr.TitleBg] = ImVec4(0.00, 0.26, 0.30, 0.94) 
-	colors[clr.TitleBgActive] = ImVec4(0.00, 0.26, 0.29, 0.94) 
-	colors[clr.TitleBgCollapsed] = ImVec4(0.01, 0.28, 0.40, 0.66) 
-	colors[clr.MenuBarBg] = ImVec4(0.00, 0.22, 0.22, 0.73) 
-	colors[clr.ScrollbarBg] = ImVec4(0.01, 0.44, 0.43, 0.60) 
-	colors[clr.ScrollbarGrab] = ImVec4(0.00, 0.93, 1.00, 0.31) 
-	colors[clr.ScrollbarGrabHovered] = ImVec4(0.17, 0.64, 0.79, 1.00) 
-	colors[clr.ScrollbarGrabActive] = ImVec4(0.01, 0.48, 0.57, 1.00) 
-	colors[clr.ComboBg] = ImVec4(0.01, 0.51, 0.50, 0.74) 
-	colors[clr.CheckMark] = ImVec4(0.17, 0.87, 0.85, 0.62) 
-	colors[clr.SliderGrab] = ImVec4(0.10, 0.84, 0.87, 0.31) 
-	colors[clr.SliderGrabActive] = ImVec4(0.06, 0.05, 0.07, 1.00) 
-	colors[clr.Button] = ImVec4(0.09, 0.70, 0.75, 0.48) 
-	colors[clr.ButtonHovered] = ImVec4(0.15, 0.72, 0.75, 0.69) 
-	colors[clr.ButtonActive] = ImVec4(0.13, 0.92, 0.98, 0.47) 
-	colors[clr.Header] = ImVec4(0.09, 0.65, 0.69, 0.47) 
-	colors[clr.HeaderHovered] = ImVec4(0.07, 0.54, 0.58, 0.47) 
-	colors[clr.HeaderActive] = ImVec4(0.06, 0.50, 0.53, 0.47) 
-	colors[clr.Separator] = ImVec4(0.00, 0.20, 0.23, 1.00) 
-	colors[clr.SeparatorHovered] = ImVec4(0.00, 0.20, 0.23, 1.00) 
-	colors[clr.SeparatorActive] = ImVec4(0.00, 0.20, 0.23, 1.00) 
-	colors[clr.ResizeGrip] = ImVec4(0.06, 0.90, 0.78, 0.16) 
-	colors[clr.ResizeGripHovered] = ImVec4(0.04, 0.54, 0.48, 1.00) 
-	colors[clr.ResizeGripActive] = ImVec4(0.01, 0.28, 0.41, 1.00) 
-	colors[clr.CloseButton] = ImVec4(0.00, 0.94, 0.96, 0.25) 
-	colors[clr.CloseButtonHovered] = ImVec4(0.15, 0.63, 0.61, 0.39) 
-	colors[clr.CloseButtonActive] = ImVec4(0.15, 0.63, 0.61, 0.39) 
-	colors[clr.PlotLines] = ImVec4(0.40, 0.39, 0.38, 0.63) 
-	colors[clr.PlotLinesHovered] = ImVec4(0.25, 1.00, 0.00, 1.00) 
-	colors[clr.PlotHistogram] = ImVec4(0.40, 0.39, 0.38, 0.63) 
-	colors[clr.PlotHistogramHovered] = ImVec4(0.25, 1.00, 0.00, 1.00) 
-	colors[clr.TextSelectedBg] = ImVec4(0.25, 1.00, 0.00, 0.43) 
-	colors[clr.ModalWindowDarkening] = ImVec4(0.00, 0.00, 0.00, 0.80)
+	if Theme == 1 then
+		SCRIPTCOLOR = 0x046D63
+		Secondcolor.v = '00C2BB'
+		colors[clr.Text] = ImVec4(0.71, 0.94, 0.93, 1.00) 
+		colors[clr.TextDisabled] = ImVec4(0.24, 0.23, 0.29, 1.00) 
+		colors[clr.WindowBg] = ImVec4(0.00, 0.06, 0.08, 0.91) 
+		colors[clr.ChildWindowBg] = ImVec4(0.00, 0.07, 0.07, 0.91) 
+		colors[clr.PopupBg] = ImVec4(0.02, 0.08, 0.09, 0.94) 
+		colors[clr.Border] = ImVec4(0.04, 0.60, 0.55, 0.88) 
+		colors[clr.BorderShadow] = ImVec4(0.92, 0.91, 0.88, 0.00) 
+		colors[clr.FrameBg] = ImVec4(0.02, 0.60, 0.56, 0.49) 
+		colors[clr.FrameBgHovered] = ImVec4(0.10, 0.63, 0.69, 0.72) 
+		colors[clr.FrameBgActive] = ImVec4(0.04, 0.54, 0.60, 1.00) 
+		colors[clr.TitleBg] = ImVec4(0.00, 0.26, 0.30, 0.94) 
+		colors[clr.TitleBgActive] = ImVec4(0.00, 0.26, 0.29, 0.94) 
+		colors[clr.TitleBgCollapsed] = ImVec4(0.01, 0.28, 0.40, 0.66) 
+		colors[clr.MenuBarBg] = ImVec4(0.00, 0.22, 0.22, 0.73) 
+		colors[clr.ScrollbarBg] = ImVec4(0.01, 0.44, 0.43, 0.60) 
+		colors[clr.ScrollbarGrab] = ImVec4(0.00, 0.93, 1.00, 0.31) 
+		colors[clr.ScrollbarGrabHovered] = ImVec4(0.17, 0.64, 0.79, 1.00) 
+		colors[clr.ScrollbarGrabActive] = ImVec4(0.01, 0.48, 0.57, 1.00) 
+		colors[clr.ComboBg] = ImVec4(0.01, 0.51, 0.50, 0.74) 
+		colors[clr.CheckMark] = ImVec4(0.17, 0.87, 0.85, 0.62) 
+		colors[clr.SliderGrab] = ImVec4(0.10, 0.84, 0.87, 0.31) 
+		colors[clr.SliderGrabActive] = ImVec4(0.06, 0.05, 0.07, 1.00) 
+		colors[clr.Button] = ImVec4(0.09, 0.70, 0.75, 0.48) 
+		colors[clr.ButtonHovered] = ImVec4(0.15, 0.72, 0.75, 0.69) 
+		colors[clr.ButtonActive] = ImVec4(0.13, 0.92, 0.98, 0.47) 
+		colors[clr.Header] = ImVec4(0.09, 0.65, 0.69, 0.47) 
+		colors[clr.HeaderHovered] = ImVec4(0.07, 0.54, 0.58, 0.47) 
+		colors[clr.HeaderActive] = ImVec4(0.06, 0.50, 0.53, 0.47) 
+		colors[clr.Separator] = ImVec4(0.00, 0.20, 0.23, 1.00) 
+		colors[clr.SeparatorHovered] = ImVec4(0.00, 0.20, 0.23, 1.00) 
+		colors[clr.SeparatorActive] = ImVec4(0.00, 0.20, 0.23, 1.00) 
+		colors[clr.ResizeGrip] = ImVec4(0.06, 0.90, 0.78, 0.16) 
+		colors[clr.ResizeGripHovered] = ImVec4(0.04, 0.54, 0.48, 1.00) 
+		colors[clr.ResizeGripActive] = ImVec4(0.01, 0.28, 0.41, 1.00) 
+		colors[clr.CloseButton] = ImVec4(0.00, 0.94, 0.96, 0.25) 
+		colors[clr.CloseButtonHovered] = ImVec4(0.15, 0.63, 0.61, 0.39) 
+		colors[clr.CloseButtonActive] = ImVec4(0.15, 0.63, 0.61, 0.39) 
+		colors[clr.PlotLines] = ImVec4(0.40, 0.39, 0.38, 0.63) 
+		colors[clr.PlotLinesHovered] = ImVec4(0.25, 1.00, 0.00, 1.00) 
+		colors[clr.PlotHistogram] = ImVec4(0.40, 0.39, 0.38, 0.63) 
+		colors[clr.PlotHistogramHovered] = ImVec4(0.25, 1.00, 0.00, 1.00) 
+		colors[clr.TextSelectedBg] = ImVec4(0.25, 1.00, 0.00, 0.43) 
+		colors[clr.ModalWindowDarkening] = ImVec4(0.00, 0.00, 0.00, 0.80)
+	elseif Theme == 2 then
+		SCRIPTCOLOR = 0x4F4F4F
+		Secondcolor.v = 'A7A7A7'
+		colors[clr.Text] = ImVec4(0.80, 0.80, 0.83, 1.00)
+		colors[clr.TextDisabled] = ImVec4(0.24, 0.23, 0.29, 1.00)
+		colors[clr.ChildWindowBg] = ImVec4(0.07, 0.07, 0.09, 0.50)
+		colors[clr.PopupBg] = ImVec4(0.07, 0.07, 0.09, 0.80)
+		colors[clr.Border] = ImVec4(0.80, 0.80, 0.83, 0.88)
+		colors[clr.BorderShadow] = ImVec4(0.92, 0.91, 0.88, 0.00)
+		--colors[clr.TitleBgCollapsed] = ImVec4(0.00, 0.00, 0.00, 0.51)
+		colors[clr.TitleBgCollapsed] = ImVec4(0.24, 0.23, 0.29, 1.00)
+		colors[clr.TitleBgActive] = ImVec4(0.07, 0.07, 0.09, 1.00)
+		colors[clr.MenuBarBg] = ImVec4(0.10, 0.09, 0.12, 0.50) 	
+		colors[clr.ScrollbarBg] = ImVec4(0.10, 0.09, 0.12, 1.00)
+		colors[clr.ScrollbarGrab] = ImVec4(0.80, 0.80, 0.83, 0.31)
+		colors[clr.ScrollbarGrabHovered] = ImVec4(0.56, 0.56, 0.58, 1.00)
+		colors[clr.ScrollbarGrabActive] = ImVec4(0.06, 0.05, 0.07, 1.00)
+		colors[clr.ComboBg] = ImVec4(0.19, 0.18, 0.21, 0.50)
+		colors[clr.CheckMark] = ImVec4(0.80, 0.80, 0.83, 0.31)
+		colors[clr.SliderGrab] = ImVec4(0.80, 0.80, 0.83, 0.31)
+		colors[clr.SliderGrabActive] = ImVec4(0.06, 0.05, 0.07, 1.00)
+		colors[clr.Button] = ImVec4(0.10, 0.09, 0.12, 1.00)
+		colors[clr.ButtonHovered] = ImVec4(0.24, 0.23, 0.29, 1.00)
+		colors[clr.ButtonActive] = ImVec4(0.56, 0.56, 0.58, 1.00)
+		colors[clr.Header] = ImVec4(0.10, 0.09, 0.12, 1.00)
+		--colors[clr.HeaderHovered] = ImVec4(0.56, 0.56, 0.58, 1.00)
+		colors[clr.HeaderHovered] = ImVec4(0.24, 0.23, 0.29, 1.00)
+		colors[clr.HeaderActive] = ImVec4(0.06, 0.05, 0.07, 1.00)
+		colors[clr.ResizeGrip] = ImVec4(0.00, 0.00, 0.00, 0.00)
+		colors[clr.ResizeGripHovered] = ImVec4(0.56, 0.56, 0.58, 1.00)
+		colors[clr.ResizeGripActive] = ImVec4(0.06, 0.05, 0.07, 1.00)
+		colors[clr.CloseButton] = ImVec4(0.40, 0.39, 0.38, 0.16)
+		colors[clr.CloseButtonHovered] = ImVec4(0.40, 0.39, 0.38, 0.39)
+		colors[clr.CloseButtonActive] = ImVec4(0.40, 0.39, 0.38, 1.00)
+		colors[clr.PlotLines] = ImVec4(0.40, 0.39, 0.38, 0.63)
+		colors[clr.PlotLinesHovered] = ImVec4(0.25, 1.00, 0.00, 1.00)
+		colors[clr.PlotHistogram] = ImVec4(0.40, 0.39, 0.38, 0.63)
+		colors[clr.PlotHistogramHovered] = ImVec4(0.25, 1.00, 0.00, 1.00)
+		colors[clr.TextSelectedBg] = ImVec4(0.25, 1.00, 0.00, 0.43)
+		--colors[clr.ModalWindowDarkening] = ImVec4(1.00, 0.98, 0.95, 0.70)
+		colors[clr.ModalWindowDarkening] = ImVec4(0.00, 0.00, 0.00, 0.80)
+
+		colors[clr.WindowBg] = ImVec4(0.06, 0.05, 0.07, 0.98)
+		--colors[clr.FrameBg] = ImVec4(0.10, 0.09, 0.12, 1.00)
+		colors[clr.FrameBg] = ImVec4(0.13, 0.12, 0.15, 1.00)
+		colors[clr.FrameBgHovered] = ImVec4(0.24, 0.23, 0.29, 1.00)
+		colors[clr.FrameBgActive] = ImVec4(0.56, 0.56, 0.58, 1.00)
+		colors[clr.TitleBg] = ImVec4(0.10, 0.09, 0.12, 0.50)
+	elseif Theme == 3 then
+		SCRIPTCOLOR = 0xcc5400
+		Secondcolor.v = 'E69C67'
+		colors[clr.Text] = ImVec4(0.80, 0.80, 0.83, 1.00)
+		colors[clr.TextDisabled] = ImVec4(0.24, 0.23, 0.29, 1.00)
+		colors[clr.WindowBg] = ImVec4(0.06, 0.05, 0.07, 1.00)
+		colors[clr.ChildWindowBg] = ImVec4(0.07, 0.07, 0.09, 1.00)
+		colors[clr.PopupBg] = ImVec4(0.07, 0.07, 0.09, 1.00)
+		colors[clr.Border] = ImVec4(0.80, 0.80, 0.83, 0.88)
+		colors[clr.BorderShadow] = ImVec4(0.92, 0.91, 0.88, 0.00)
+		colors[clr.FrameBg] = ImVec4(0.10, 0.09, 0.12, 1.00)
+		colors[clr.FrameBgHovered] = ImVec4(0.24, 0.23, 0.29, 1.00)
+		colors[clr.FrameBgActive] = ImVec4(0.56, 0.56, 0.58, 1.00)
+		colors[clr.TitleBg] = ImVec4(0.76, 0.31, 0.00, 1.00)
+		colors[clr.TitleBgCollapsed] = ImVec4(1.00, 0.98, 0.95, 0.75)
+		colors[clr.TitleBgActive] = ImVec4(0.80, 0.33, 0.00, 1.00)
+		colors[clr.MenuBarBg] = ImVec4(0.10, 0.09, 0.12, 1.00)
+		colors[clr.ScrollbarBg] = ImVec4(0.10, 0.09, 0.12, 1.00)
+		colors[clr.ScrollbarGrab] = ImVec4(0.80, 0.80, 0.83, 0.31)
+		colors[clr.ScrollbarGrabHovered] = ImVec4(0.56, 0.56, 0.58, 1.00)
+		colors[clr.ScrollbarGrabActive] = ImVec4(0.06, 0.05, 0.07, 1.00)
+		colors[clr.ComboBg] = ImVec4(0.19, 0.18, 0.21, 1.00)
+		colors[clr.CheckMark] = ImVec4(1.00, 0.42, 0.00, 0.53)
+		colors[clr.SliderGrab] = ImVec4(1.00, 0.42, 0.00, 0.53)
+		colors[clr.SliderGrabActive] = ImVec4(1.00, 0.42, 0.00, 1.00)
+		colors[clr.Button] = ImVec4(0.10, 0.09, 0.12, 1.00)
+		colors[clr.ButtonHovered] = ImVec4(0.24, 0.23, 0.29, 1.00)
+		colors[clr.ButtonActive] = ImVec4(0.56, 0.56, 0.58, 1.00)
+		colors[clr.Header] = ImVec4(0.10, 0.09, 0.12, 1.00)
+		colors[clr.HeaderHovered] = ImVec4(0.56, 0.56, 0.58, 1.00)
+		colors[clr.HeaderActive] = ImVec4(0.06, 0.05, 0.07, 1.00)
+		colors[clr.ResizeGrip] = ImVec4(0.00, 0.00, 0.00, 0.00)
+		colors[clr.ResizeGripHovered] = ImVec4(0.56, 0.56, 0.58, 1.00)
+		colors[clr.ResizeGripActive] = ImVec4(0.06, 0.05, 0.07, 1.00)
+		colors[clr.CloseButton] = ImVec4(0.40, 0.39, 0.38, 0.16)
+		colors[clr.CloseButtonHovered] = ImVec4(0.40, 0.39, 0.38, 0.39)
+		colors[clr.CloseButtonActive] = ImVec4(0.40, 0.39, 0.38, 1.00)
+		colors[clr.PlotLines] = ImVec4(0.40, 0.39, 0.38, 0.63)
+		colors[clr.PlotLinesHovered] = ImVec4(0.25, 1.00, 0.00, 1.00)
+		colors[clr.PlotHistogram] = ImVec4(0.40, 0.39, 0.38, 0.63)
+		colors[clr.PlotHistogramHovered] = ImVec4(0.25, 1.00, 0.00, 1.00)
+		colors[clr.TextSelectedBg] = ImVec4(0.25, 1.00, 0.00, 0.43)
+		colors[clr.ModalWindowDarkening] = ImVec4(1.00, 0.98, 0.95, 0.73)
+	elseif Theme == 4 then
+		SCRIPTCOLOR = 0x5b3680
+		Secondcolor.v = 'A183C0'
+		colors[clr.WindowBg]              = ImVec4(0.14, 0.12, 0.16, 1.00)
+		colors[clr.ChildWindowBg]         = ImVec4(0.30, 0.20, 0.39, 0.00)
+		colors[clr.PopupBg]               = ImVec4(0.05, 0.05, 0.10, 0.90)
+		colors[clr.Border]                = ImVec4(0.89, 0.85, 0.92, 0.30)
+		colors[clr.BorderShadow]          = ImVec4(0.00, 0.00, 0.00, 0.00)
+		colors[clr.FrameBg]               = ImVec4(0.30, 0.20, 0.39, 1.00)
+		colors[clr.FrameBgHovered]        = ImVec4(0.41, 0.19, 0.63, 0.68)
+		colors[clr.FrameBgActive]         = ImVec4(0.41, 0.19, 0.63, 1.00)
+		colors[clr.TitleBg]               = ImVec4(0.41, 0.19, 0.63, 0.45)
+		colors[clr.TitleBgCollapsed]      = ImVec4(0.41, 0.19, 0.63, 0.35)
+		colors[clr.TitleBgActive]         = ImVec4(0.41, 0.19, 0.63, 0.78)
+		colors[clr.MenuBarBg]             = ImVec4(0.30, 0.20, 0.39, 0.57)
+		colors[clr.ScrollbarBg]           = ImVec4(0.30, 0.20, 0.39, 1.00)
+		colors[clr.ScrollbarGrab]         = ImVec4(0.41, 0.19, 0.63, 0.31)
+		colors[clr.ScrollbarGrabHovered]  = ImVec4(0.41, 0.19, 0.63, 0.78)
+		colors[clr.ScrollbarGrabActive]   = ImVec4(0.41, 0.19, 0.63, 1.00)
+		colors[clr.ComboBg]               = ImVec4(0.30, 0.20, 0.39, 1.00)
+		colors[clr.CheckMark]             = ImVec4(0.56, 0.61, 1.00, 1.00)
+		colors[clr.SliderGrab]            = ImVec4(0.41, 0.19, 0.63, 0.24)
+		colors[clr.SliderGrabActive]      = ImVec4(0.41, 0.19, 0.63, 1.00)
+		colors[clr.Button]                = ImVec4(0.41, 0.19, 0.63, 0.44)
+		colors[clr.ButtonHovered]         = ImVec4(0.41, 0.19, 0.63, 0.86)
+		colors[clr.ButtonActive]          = ImVec4(0.64, 0.33, 0.94, 1.00)
+		colors[clr.Header]                = ImVec4(0.41, 0.19, 0.63, 0.76)
+		colors[clr.HeaderHovered]         = ImVec4(0.41, 0.19, 0.63, 0.86)
+		colors[clr.HeaderActive]          = ImVec4(0.41, 0.19, 0.63, 1.00)
+		colors[clr.ResizeGrip]            = ImVec4(0.41, 0.19, 0.63, 0.20)
+		colors[clr.ResizeGripHovered]     = ImVec4(0.41, 0.19, 0.63, 0.78)
+		colors[clr.ResizeGripActive]      = ImVec4(0.41, 0.19, 0.63, 1.00)
+		colors[clr.CloseButton]           = ImVec4(1.00, 1.00, 1.00, 0.75)
+		colors[clr.CloseButtonHovered]    = ImVec4(0.88, 0.74, 1.00, 0.59)
+		colors[clr.CloseButtonActive]     = ImVec4(0.88, 0.85, 0.92, 1.00)
+		colors[clr.PlotLines]             = ImVec4(0.89, 0.85, 0.92, 0.63)
+		colors[clr.PlotLinesHovered]      = ImVec4(0.41, 0.19, 0.63, 1.00)
+		colors[clr.PlotHistogram]         = ImVec4(0.89, 0.85, 0.92, 0.63)
+		colors[clr.PlotHistogramHovered]  = ImVec4(0.41, 0.19, 0.63, 1.00)
+		colors[clr.TextSelectedBg]        = ImVec4(0.41, 0.19, 0.63, 0.43)
+		colors[clr.ModalWindowDarkening]  = ImVec4(0.20, 0.20, 0.20, 0.35)
+	elseif Theme == 5 then
+		SCRIPTCOLOR = 0x4e4e4e
+		Secondcolor.v = 'A7A7A7'
+	    colors[clr.Text]                   = ImVec4(0.90, 0.90, 0.90, 1.00)
+		colors[clr.TextDisabled]           = ImVec4(1.00, 1.00, 1.00, 1.00)
+		colors[clr.WindowBg]               = ImVec4(0.00, 0.00, 0.00, 1.00)
+		colors[clr.ChildWindowBg]          = ImVec4(0.00, 0.00, 0.00, 1.00)
+		colors[clr.PopupBg]                = ImVec4(0.00, 0.00, 0.00, 1.00)
+		colors[clr.Border]                 = ImVec4(0.82, 0.77, 0.78, 1.00)
+		colors[clr.BorderShadow]           = ImVec4(0.35, 0.35, 0.35, 0.66)
+		colors[clr.FrameBg]                = ImVec4(1.00, 1.00, 1.00, 0.28)
+		colors[clr.FrameBgHovered]         = ImVec4(0.68, 0.68, 0.68, 0.67)
+		colors[clr.FrameBgActive]          = ImVec4(0.79, 0.73, 0.73, 0.62)
+		colors[clr.TitleBg]                = ImVec4(0.00, 0.00, 0.00, 1.00)
+		colors[clr.TitleBgActive]          = ImVec4(0.46, 0.46, 0.46, 1.00)
+		colors[clr.TitleBgCollapsed]       = ImVec4(0.00, 0.00, 0.00, 1.00)
+		colors[clr.MenuBarBg]              = ImVec4(0.00, 0.00, 0.00, 0.80)
+		colors[clr.ScrollbarBg]            = ImVec4(0.00, 0.00, 0.00, 0.60)
+		colors[clr.ScrollbarGrab]          = ImVec4(1.00, 1.00, 1.00, 0.87)
+		colors[clr.ScrollbarGrabHovered]   = ImVec4(1.00, 1.00, 1.00, 0.79)
+		colors[clr.ScrollbarGrabActive]    = ImVec4(0.80, 0.50, 0.50, 0.40)
+		colors[clr.ComboBg]                = ImVec4(0.24, 0.24, 0.24, 0.99)
+		colors[clr.CheckMark]              = ImVec4(0.99, 0.99, 0.99, 0.52)
+		colors[clr.SliderGrab]             = ImVec4(1.00, 1.00, 1.00, 0.42)
+		colors[clr.SliderGrabActive]       = ImVec4(0.76, 0.76, 0.76, 1.00)
+		colors[clr.Button]                 = ImVec4(0.51, 0.51, 0.51, 0.60)
+		colors[clr.ButtonHovered]          = ImVec4(0.68, 0.68, 0.68, 1.00)
+		colors[clr.ButtonActive]           = ImVec4(0.67, 0.67, 0.67, 1.00)
+		colors[clr.Header]                 = ImVec4(0.72, 0.72, 0.72, 0.54)
+		colors[clr.HeaderHovered]          = ImVec4(0.92, 0.92, 0.95, 0.77)
+		colors[clr.HeaderActive]           = ImVec4(0.82, 0.82, 0.82, 0.80)
+		colors[clr.Separator]              = ImVec4(0.73, 0.73, 0.73, 1.00)
+		colors[clr.SeparatorHovered]       = ImVec4(0.81, 0.81, 0.81, 1.00)
+		colors[clr.SeparatorActive]        = ImVec4(0.74, 0.74, 0.74, 1.00)
+		colors[clr.ResizeGrip]             = ImVec4(0.80, 0.80, 0.80, 0.30)
+		colors[clr.ResizeGripHovered]      = ImVec4(0.95, 0.95, 0.95, 0.60)
+		colors[clr.ResizeGripActive]       = ImVec4(1.00, 1.00, 1.00, 0.90)
+		colors[clr.CloseButton]            = ImVec4(0.45, 0.45, 0.45, 0.50)
+		colors[clr.CloseButtonHovered]     = ImVec4(0.70, 0.70, 0.90, 0.60)
+		colors[clr.CloseButtonActive]      = ImVec4(0.70, 0.70, 0.70, 1.00)
+		colors[clr.PlotLines]              = ImVec4(1.00, 1.00, 1.00, 1.00)
+		colors[clr.PlotLinesHovered]       = ImVec4(1.00, 1.00, 1.00, 1.00)
+		colors[clr.PlotHistogram]          = ImVec4(1.00, 1.00, 1.00, 1.00)
+		colors[clr.PlotHistogramHovered]   = ImVec4(1.00, 1.00, 1.00, 1.00)
+		colors[clr.TextSelectedBg]         = ImVec4(1.00, 1.00, 1.00, 0.35)
+		colors[clr.ModalWindowDarkening]   = ImVec4(0.88, 0.88, 0.88, 0.35)
+	elseif Theme == 6 then
+		SCRIPTCOLOR = 0x005ec7
+		Secondcolor.v = '66A1E3'
+		colors[clr.Text]   = ImVec4(0.00, 0.00, 0.00, 0.51)
+		colors[clr.TextDisabled]   = ImVec4(0.24, 0.24, 0.24, 1.00)
+		colors[clr.WindowBg]              = ImVec4(1.00, 1.00, 1.00, 1.00)
+		colors[clr.ChildWindowBg]         = ImVec4(0.96, 0.96, 0.96, 1.00)
+		colors[clr.PopupBg]               = ImVec4(0.92, 0.92, 0.92, 1.00)
+		colors[clr.Border]                = ImVec4(0.86, 0.86, 0.86, 1.00)
+		colors[clr.BorderShadow]          = ImVec4(0.00, 0.00, 0.00, 0.00)
+		colors[clr.FrameBg]               = ImVec4(0.88, 0.88, 0.88, 1.00)
+		colors[clr.FrameBgHovered]        = ImVec4(0.82, 0.82, 0.82, 1.00)
+		colors[clr.FrameBgActive]         = ImVec4(0.76, 0.76, 0.76, 1.00)
+		colors[clr.TitleBg]               = ImVec4(0.00, 0.45, 1.00, 0.82)
+		colors[clr.TitleBgCollapsed]      = ImVec4(0.00, 0.45, 1.00, 0.82)
+		colors[clr.TitleBgActive]         = ImVec4(0.00, 0.45, 1.00, 0.82)
+		colors[clr.MenuBarBg]             = ImVec4(0.00, 0.37, 0.78, 1.00)
+		colors[clr.ScrollbarBg]           = ImVec4(0.00, 0.00, 0.00, 0.00)
+		colors[clr.ScrollbarGrab]         = ImVec4(0.00, 0.35, 1.00, 0.78)
+		colors[clr.ScrollbarGrabHovered]  = ImVec4(0.00, 0.33, 1.00, 0.84)
+		colors[clr.ScrollbarGrabActive]   = ImVec4(0.00, 0.31, 1.00, 0.88)
+		colors[clr.ComboBg]               = ImVec4(0.92, 0.92, 0.92, 1.00)
+		colors[clr.CheckMark]             = ImVec4(0.00, 0.49, 1.00, 0.59)
+		colors[clr.SliderGrab]            = ImVec4(0.00, 0.49, 1.00, 0.59)
+		colors[clr.SliderGrabActive]      = ImVec4(0.00, 0.39, 1.00, 0.71)
+		colors[clr.Button]                = ImVec4(0.00, 0.49, 1.00, 0.59)
+		colors[clr.ButtonHovered]         = ImVec4(0.00, 0.49, 1.00, 0.71)
+		colors[clr.ButtonActive]          = ImVec4(0.00, 0.49, 1.00, 0.78)
+		colors[clr.Header]                = ImVec4(0.00, 0.49, 1.00, 0.78)
+		colors[clr.HeaderHovered]         = ImVec4(0.00, 0.49, 1.00, 0.71)
+		colors[clr.HeaderActive]          = ImVec4(0.00, 0.49, 1.00, 0.78)
+		colors[clr.ResizeGrip]            = ImVec4(0.00, 0.39, 1.00, 0.59)
+		colors[clr.ResizeGripHovered]     = ImVec4(0.00, 0.27, 1.00, 0.59)
+		colors[clr.ResizeGripActive]      = ImVec4(0.00, 0.25, 1.00, 0.63)
+		colors[clr.CloseButton]           = ImVec4(0.00, 0.35, 0.96, 0.71)
+		colors[clr.CloseButtonHovered]    = ImVec4(0.00, 0.31, 0.88, 0.69)
+		colors[clr.CloseButtonActive]     = ImVec4(0.00, 0.25, 0.88, 0.67)
+		colors[clr.PlotLines]             = ImVec4(0.00, 0.39, 1.00, 0.75)
+		colors[clr.PlotLinesHovered]      = ImVec4(0.00, 0.39, 1.00, 0.75)
+		colors[clr.PlotHistogram]         = ImVec4(0.00, 0.39, 1.00, 0.75)
+		colors[clr.PlotHistogramHovered]  = ImVec4(0.00, 0.35, 0.92, 0.78)
+		colors[clr.TextSelectedBg]        = ImVec4(0.00, 0.47, 1.00, 0.59)
+		colors[clr.ModalWindowDarkening]  = ImVec4(0.20, 0.20, 0.20, 0.35)
+	elseif Theme == 7 then
+		SCRIPTCOLOR = 0x33404a
+		Secondcolor.v = '8898A4'
+		colors[clr.Text] = ImVec4(0.95, 0.96, 0.98, 1.00)
+		colors[clr.TextDisabled] = ImVec4(0.36, 0.42, 0.47, 1.00)
+		colors[clr.WindowBg] = ImVec4(0.11, 0.15, 0.17, 1.00)
+		colors[clr.ChildWindowBg] = ImVec4(0.15, 0.18, 0.22, 1.00)
+		colors[clr.PopupBg] = ImVec4(0.08, 0.08, 0.08, 0.94)
+		colors[clr.Border] = ImVec4(0.43, 0.43, 0.50, 0.50)
+		colors[clr.BorderShadow] = ImVec4(0.00, 0.00, 0.00, 0.00)
+		colors[clr.FrameBg] = ImVec4(0.20, 0.25, 0.29, 1.00)
+		colors[clr.FrameBgHovered] = ImVec4(0.12, 0.20, 0.28, 1.00)
+		colors[clr.FrameBgActive] = ImVec4(0.09, 0.12, 0.14, 1.00)
+		colors[clr.TitleBg] = ImVec4(0.09, 0.12, 0.14, 0.65)
+		colors[clr.TitleBgCollapsed] = ImVec4(0.00, 0.00, 0.00, 0.51)
+		colors[clr.TitleBgActive] = ImVec4(0.08, 0.10, 0.12, 1.00)
+		colors[clr.MenuBarBg] = ImVec4(0.15, 0.18, 0.22, 1.00)
+		colors[clr.ScrollbarBg] = ImVec4(0.02, 0.02, 0.02, 0.39)
+		colors[clr.ScrollbarGrab] = ImVec4(0.20, 0.25, 0.29, 1.00)
+		colors[clr.ScrollbarGrabHovered] = ImVec4(0.18, 0.22, 0.25, 1.00)
+		colors[clr.ScrollbarGrabActive] = ImVec4(0.09, 0.21, 0.31, 1.00)
+		colors[clr.ComboBg] = ImVec4(0.20, 0.25, 0.29, 1.00)
+		colors[clr.CheckMark] = ImVec4(0.28, 0.56, 1.00, 1.00)
+		colors[clr.SliderGrab] = ImVec4(0.28, 0.56, 1.00, 1.00)
+		colors[clr.SliderGrabActive] = ImVec4(0.37, 0.61, 1.00, 1.00)
+		colors[clr.Button] = ImVec4(0.20, 0.25, 0.29, 1.00)
+		colors[clr.ButtonHovered] = ImVec4(0.28, 0.56, 1.00, 1.00)
+		colors[clr.ButtonActive] = ImVec4(0.06, 0.53, 0.98, 1.00)
+		colors[clr.Header] = ImVec4(0.20, 0.25, 0.29, 0.55)
+		colors[clr.HeaderHovered] = ImVec4(0.26, 0.59, 0.98, 0.80)
+		colors[clr.HeaderActive] = ImVec4(0.26, 0.59, 0.98, 1.00)
+		colors[clr.ResizeGrip] = ImVec4(0.26, 0.59, 0.98, 0.25)
+		colors[clr.ResizeGripHovered] = ImVec4(0.26, 0.59, 0.98, 0.67)
+		colors[clr.ResizeGripActive] = ImVec4(0.06, 0.05, 0.07, 1.00)
+		colors[clr.CloseButton] = ImVec4(0.40, 0.39, 0.38, 0.16)
+		colors[clr.CloseButtonHovered] = ImVec4(0.40, 0.39, 0.38, 0.39)
+		colors[clr.CloseButtonActive] = ImVec4(0.40, 0.39, 0.38, 1.00)
+		colors[clr.PlotLines] = ImVec4(0.61, 0.61, 0.61, 1.00)
+		colors[clr.PlotLinesHovered] = ImVec4(1.00, 0.43, 0.35, 1.00)
+		colors[clr.PlotHistogram] = ImVec4(0.90, 0.70, 0.00, 1.00)
+		colors[clr.PlotHistogramHovered] = ImVec4(1.00, 0.60, 0.00, 1.00)
+		colors[clr.TextSelectedBg] = ImVec4(0.25, 1.00, 0.00, 0.43)
+		colors[clr.ModalWindowDarkening] = ImVec4(1.00, 0.98, 0.95, 0.73)
+	elseif Theme == 8 then
+		
+		SCRIPTCOLOR = 0x572D2D
+		Secondcolor.v = 'AB7E7E'
+		colors[clr.Text]                 = ImVec4(1.00, 1.00, 1.00, 1.00)
+		colors[clr.TextDisabled]         = ImVec4(0.73, 0.75, 0.74, 1.00)
+		colors[clr.WindowBg]             = ImVec4(0.09, 0.09, 0.09, 0.94)
+		colors[clr.ChildWindowBg]        = ImVec4(0.00, 0.00, 0.00, 0.00)
+		colors[clr.PopupBg]              = ImVec4(0.08, 0.08, 0.08, 0.94)
+		colors[clr.Border]               = ImVec4(0.20, 0.20, 0.20, 0.50)
+		colors[clr.BorderShadow]         = ImVec4(0.00, 0.00, 0.00, 0.00)
+		colors[clr.FrameBg]              = ImVec4(0.71, 0.39, 0.39, 0.54)
+		colors[clr.FrameBgHovered]       = ImVec4(0.84, 0.66, 0.66, 0.40)
+		colors[clr.FrameBgActive]        = ImVec4(0.84, 0.66, 0.66, 0.67)
+		colors[clr.TitleBg]              = ImVec4(0.47, 0.22, 0.22, 0.67)
+		colors[clr.TitleBgActive]        = ImVec4(0.47, 0.22, 0.22, 1.00)
+		colors[clr.TitleBgCollapsed]     = ImVec4(0.47, 0.22, 0.22, 0.67)
+		colors[clr.MenuBarBg]            = ImVec4(0.34, 0.16, 0.16, 1.00)
+		colors[clr.ScrollbarBg]          = ImVec4(0.02, 0.02, 0.02, 0.53)
+		colors[clr.ScrollbarGrab]        = ImVec4(0.31, 0.31, 0.31, 1.00)
+		colors[clr.ScrollbarGrabHovered] = ImVec4(0.41, 0.41, 0.41, 1.00)
+		colors[clr.ScrollbarGrabActive]  = ImVec4(0.51, 0.51, 0.51, 1.00)
+		colors[clr.CheckMark]            = ImVec4(1.00, 1.00, 1.00, 1.00)
+		colors[clr.SliderGrab]           = ImVec4(0.71, 0.39, 0.39, 1.00)
+		colors[clr.SliderGrabActive]     = ImVec4(0.84, 0.66, 0.66, 1.00)
+		colors[clr.Button]               = ImVec4(0.47, 0.22, 0.22, 0.65)
+		colors[clr.ButtonHovered]        = ImVec4(0.71, 0.39, 0.39, 0.65)
+		colors[clr.ButtonActive]         = ImVec4(0.20, 0.20, 0.20, 0.50)
+		colors[clr.Header]               = ImVec4(0.71, 0.39, 0.39, 0.54)
+		colors[clr.HeaderHovered]        = ImVec4(0.84, 0.66, 0.66, 0.65)
+		colors[clr.HeaderActive]         = ImVec4(0.84, 0.66, 0.66, 0.00)
+		colors[clr.Separator]            = ImVec4(0.43, 0.43, 0.50, 0.50)
+		colors[clr.SeparatorHovered]     = ImVec4(0.71, 0.39, 0.39, 0.54)
+		colors[clr.SeparatorActive]      = ImVec4(0.71, 0.39, 0.39, 0.54)
+		colors[clr.ResizeGrip]           = ImVec4(0.71, 0.39, 0.39, 0.54)
+		colors[clr.ResizeGripHovered]    = ImVec4(0.84, 0.66, 0.66, 0.66)
+		colors[clr.ResizeGripActive]     = ImVec4(0.84, 0.66, 0.66, 0.66)
+		colors[clr.CloseButton]          = ImVec4(0.41, 0.41, 0.41, 1.00)
+		colors[clr.CloseButtonHovered]   = ImVec4(0.98, 0.39, 0.36, 1.00)
+		colors[clr.CloseButtonActive]    = ImVec4(0.98, 0.39, 0.36, 1.00)
+		colors[clr.PlotLines]            = ImVec4(0.61, 0.61, 0.61, 1.00)
+		colors[clr.PlotLinesHovered]     = ImVec4(1.00, 0.43, 0.35, 1.00)
+		colors[clr.PlotHistogram]        = ImVec4(0.90, 0.70, 0.00, 1.00)
+		colors[clr.PlotHistogramHovered] = ImVec4(1.00, 0.60, 0.00, 1.00)
+		colors[clr.TextSelectedBg]       = ImVec4(0.26, 0.59, 0.98, 0.35)
+		colors[clr.ModalWindowDarkening] = ImVec4(0.80, 0.80, 0.80, 0.35)
+	elseif Theme == 9 then
+		SCRIPTCOLOR = 0x801341
+		Secondcolor.v = 'C0668C'
+		colors[clr.Text] = ImVec4(0.860, 0.930, 0.890, 0.78)
+		colors[clr.TextDisabled] = ImVec4(0.860, 0.930, 0.890, 0.28)
+		colors[clr.WindowBg] = ImVec4(0.13, 0.14, 0.17, 1.00)
+		colors[clr.ChildWindowBg] = ImVec4(0.200, 0.220, 0.270, 0.58)
+		colors[clr.PopupBg] = ImVec4(0.200, 0.220, 0.270, 0.9)
+		colors[clr.Border] = ImVec4(0.31, 0.31, 1.00, 0.00)
+		colors[clr.BorderShadow] = ImVec4(0.00, 0.00, 0.00, 0.00)
+		colors[clr.FrameBg] = ImVec4(0.200, 0.220, 0.270, 1.00)
+		colors[clr.FrameBgHovered] = ImVec4(0.455, 0.198, 0.301, 0.78)
+		colors[clr.FrameBgActive] = ImVec4(0.455, 0.198, 0.301, 1.00)
+		colors[clr.TitleBg] = ImVec4(0.232, 0.201, 0.271, 1.00)
+		colors[clr.TitleBgActive] = ImVec4(0.502, 0.075, 0.256, 1.00)
+		colors[clr.TitleBgCollapsed] = ImVec4(0.200, 0.220, 0.270, 0.75)
+		colors[clr.MenuBarBg] = ImVec4(0.200, 0.220, 0.270, 0.47)
+		colors[clr.ScrollbarBg] = ImVec4(0.200, 0.220, 0.270, 1.00)
+		colors[clr.ScrollbarGrab] = ImVec4(0.09, 0.15, 0.1, 1.00)
+		colors[clr.ScrollbarGrabHovered] = ImVec4(0.455, 0.198, 0.301, 0.78)
+		colors[clr.ScrollbarGrabActive] = ImVec4(0.455, 0.198, 0.301, 1.00)
+		colors[clr.CheckMark] = ImVec4(0.71, 0.22, 0.27, 1.00)
+		colors[clr.SliderGrab] = ImVec4(0.47, 0.77, 0.83, 0.14)
+		colors[clr.SliderGrabActive] = ImVec4(0.71, 0.22, 0.27, 1.00)
+		colors[clr.Button] = ImVec4(0.455, 0.198, 0.301, 1.00)
+		colors[clr.ButtonHovered] = ImVec4(0.455, 0.198, 0.301, 0.86)
+		colors[clr.ButtonActive] = ImVec4(0.455, 0.198, 0.301, 1.00)
+		colors[clr.Header] = ImVec4(0.455, 0.198, 0.301, 0.76)
+		colors[clr.HeaderHovered] = ImVec4(0.455, 0.198, 0.301, 0.86)
+		colors[clr.HeaderActive] = ImVec4(0.502, 0.075, 0.256, 1.00)
+		colors[clr.ResizeGrip] = ImVec4(0.47, 0.77, 0.83, 0.04)
+		colors[clr.ResizeGripHovered] = ImVec4(0.455, 0.198, 0.301, 0.78)
+		colors[clr.ResizeGripActive] = ImVec4(0.455, 0.198, 0.301, 1.00)
+		colors[clr.PlotLines] = ImVec4(0.860, 0.930, 0.890, 0.63)
+		colors[clr.PlotLinesHovered] = ImVec4(0.455, 0.198, 0.301, 1.00)
+		colors[clr.PlotHistogram] = ImVec4(0.860, 0.930, 0.890, 0.63)
+		colors[clr.PlotHistogramHovered] = ImVec4(0.455, 0.198, 0.301, 1.00)
+		colors[clr.TextSelectedBg] = ImVec4(0.455, 0.198, 0.301, 0.43)
+		colors[clr.ModalWindowDarkening] = ImVec4(0.200, 0.220, 0.270, 0.73)
+	end
 
 end
-apply_custom_style()
+--apply_custom_style()
 
 function files_add() -- функция подгрузки медиа файлов
 	print("Проверка целостности файлов")
@@ -646,7 +955,7 @@ function onHotKey(id, keys) -- функция обработки всех клавиш, которые ток сущест
 				return
 			elseif k == 2 then -- открываем врата
 				if interior ~= 0 and isPlayerSoldier then
-					sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы находитесь в интерьере, команда недоступна.", 0x046D63) 
+					sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы находитесь в интерьере, команда недоступна.", SCRIPTCOLOR) 
 				elseif interior == 0 and isPlayerSoldier then
 					if gateOn.v then
 						sampSendChat("/do Камеры наблюдения автоматически распознали лицо "..(lady.v and 'девушки' or 'мужчины')..".") 
@@ -662,7 +971,7 @@ function onHotKey(id, keys) -- функция обработки всех клавиш, которые ток сущест
 				return
 			elseif k == 4 then -- клавиша локкара
 				if interior ~= 0 then
-					sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы находитесь в интерьере, команда недоступна.", 0x046D63)
+					sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы находитесь в интерьере, команда недоступна.", SCRIPTCOLOR)
 				else
 					if lockCar.v then
 						sampSendChat("/me достав ключ из кармана, "..(lady.v and 'нажала' or 'нажал').." кнопку [Открыть/Закрыть]") 
@@ -676,7 +985,7 @@ function onHotKey(id, keys) -- функция обработки всех клавиш, которые ток сущест
 					sampSetChatInputEnabled(true)
 					sampSetChatInputText("/sms "..lastnumberon.." ")
 				else
-					sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы ранее не получали входящих сообщений.", 0x046D63)
+					sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы ранее не получали входящих сообщений.", SCRIPTCOLOR)
 				end
 				return
 			elseif k == 6 then -- вставляем в чат "/sms " и номер человека, которому последний раз писали
@@ -684,7 +993,7 @@ function onHotKey(id, keys) -- функция обработки всех клавиш, которые ток сущест
 					sampSetChatInputEnabled(true)
 					sampSetChatInputText("/sms "..lastnumberfor.." ")
 				else
-					sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы ранее не отправляли СМС сообщений.", 0x046D63)
+					sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы ранее не отправляли СМС сообщений.", SCRIPTCOLOR)
 				end
 				return
 			elseif k == 7 then -- делаем реконнект
@@ -743,7 +1052,27 @@ function onHotKey(id, keys) -- функция обработки всех клавиш, которые ток сущест
 				ClearBlip()
 				return
 			elseif k == 13 then -- открываем меню
-				mainmenu()
+				if not sampIsChatInputActive() and not sampIsDialogActive() then
+					mainmenu()
+				end
+				return
+			elseif k == 14 then -- открываем чат с /r
+				if not sampIsChatInputActive() and not sampIsDialogActive() then
+					sampSetChatInputEnabled(true)
+					sampSetChatInputText("/r ")
+				end
+				return
+			elseif k == 15 then -- открываем чат с /f
+				if not sampIsChatInputActive() and not sampIsDialogActive() then
+					sampSetChatInputEnabled(true)
+					sampSetChatInputText("/f ")
+				end
+				return
+			elseif k == 16 then -- открываем чат с /g
+				if not sampIsChatInputActive() and not sampIsDialogActive() then
+					sampSetChatInputEnabled(true)
+					sampSetChatInputText("/g ")
+				end
 				return
 			end
 		end
@@ -787,144 +1116,6 @@ function WriteLog(text, path, file) -- функция записи текст в файл, используется
 	file:close()
 end
 
--- function getMessage(params) -- функция получения сообщений из ВК
--- 	lua_thread.create(function()
--- 		if token ~= 1 then -- проверка на получение токена
--- 			print("getMessage() activated")
--- 			local timestamp = 0 -- это нам нужно для сверки времени, чтобы не флудить последним сообщением
--- 			local ggvp = 0 -- это нужно, чтобы при запуске скрипта в чат не отправляло последнее сообщение из диалога
--- 			local vmmsgg = "https://api.vk.com/method/messages.getHistory?count=1&user_id="..tostring(params).."&group_id=168899283&&access_token="..tostring(token).."&v=5.80" -- сам запрос
-
--- 			while true do -- вжариваем бесконечный цикл
--- 				if remotev.v and workpause then -- если включен удаленный режим + активен VK-Int
--- 					async_http_request("GET", vmmsgg, nil, -- гоняем асинхронный запрос
--- 					function(response) -- если запрос прошел, начинаем колдовать
--- 						local vk_decode_msg = decodeJson(response.text) -- декодируем ответ ВК
--- 						if vk_decode_msg.response ~= nil then
--- 							if vk_decode_msg.response.items[1].out == 0 then -- проверяем, является ли последнее сообщение отправленное нами, а не сообществом, но это не точно
--- 								if timestamp ~= vk_decode_msg.response.items[1].date then -- сверяем время, чтобы не флудило последним сообщением
--- 									vk_decode_msg.response.items[1].text = vk_decode_msg.response.items[1].text:gsub("\\","") -- чистим текст сообщения от херни
--- 									if ggvp ~= 0 then -- собсна если это первое сообщение, то игнорим его, ибо иначе - при запуске будет выбивать последнее сообщение с диалога
--- 										if vk_decode_msg.response.items[1].text:match("/r.*") or vk_decode_msg.response.items[1].text:find("/f.*") or vk_decode_msg.response.items[1].text:match("/sms.*") or vk_decode_msg.response.items[1].text:match("/g .*") then -- чекаем на содержимое сообщения, допускаем только данные команды
--- 											sampProcessChatInput(u8:decode(vk_decode_msg.response.items[1].text)) -- отправляем команду, если все хорошо
--- 										else
--- 											vkmessage(tonumber(vkid2), "Отправлять сообщения можно только в /r, /f, /rn, /fn, /sms, /g чаты.") -- отсылаем ответ, и говорим, чтобы сосал писос
--- 										end
--- 									else
--- 										vkmessage(tonumber(vkid2), "Вы активировали удаленный режим. Чтобы начать передачу команд - введите необходимое сообщение еще раз. Активация работает до перезагрузки скрипта в игре.") -- отсылаем ответ, чтобы чел не тупил, мол почему не сработало
--- 										ggvp = 1 -- чтобы закрыть условие и начать принимать сообщения с ВК.
--- 									end
--- 									timestamp = vk_decode_msg.response.items[1].date -- устанавливаем время последнего сообщения чтобы не флудило
--- 								end
--- 							end
--- 						else
--- 							printStringNow("~B~VK is ~R~not available", 4000)
--- 							return false
--- 						end
--- 					end,
--- 					function(err)
--- 						return false
--- 					end)
--- 				end
--- 				wait(1000)
--- 			end
--- 		end
--- 	end)
--- end
-
--- function vkmessage(id, msg) -- функция отправки сообщений в ВК, и никакого JSONа хы
--- 	local https = require('ssl.https')
--- 	if token ~= 1 then	-- проверяем на наличие токена
--- 		local msg = msg:gsub(" ", "%%20")
--- 		if type(id) == 'number' then -- если айдишник указан цифрами, то один запрос
--- 			gurl = "https://api.vk.com/method/messages.send?user_id="..id.."&message="..u8(msg).."&access_token="..token.."&v=5.85&random_id="..math.random(956, 3412)
--- 		end
--- 		local zapros = https.request(gurl)
--- 		if zapros ~= nil then
--- 			local vk_decode_msg = decodeJson(zapros) -- ответ принимаем и декодируем JSON
--- 			if vk_decode_msg.response == nil then -- если есть "параметр", или как это назвать, response, то он значит, что отправлено, если его нет - выбьет ошибку
--- 				sampAddChatMessage("VK Server: {BEBEBE}"..tostring(vk_decode_msg.error.error_msg).."(API-Code: "..tostring(vk_decode_msg.error.error_code)..").", 0xFF6347) -- выводим сообщение в чат с ответом API
--- 			end
--- 		else
--- 			print("Error with vkmessage().")
--- 		end
--- 	end
--- end
-
-
--- function secure_vk()
--- 	local Lockbox = require("lockbox")
--- 	Lockbox.ALLOW_INSECURE = true;
--- 	local nu2aFsdGhua = 'RJ6WKXsxmhRcsJpTNCcaNM6qbSR8tWMJptmzUMHjhaK4pRkhJUJgMZFR7nf4S7cpaduX6Ydmgn4BbpTmHYvpUgpVZ4nJuTnTkJvhWnTUQxqCGmLpWjfZACLHAZDnNNsrh5FkPdpK5tUF4XHDdVkWYRtEDbqjLAGM2Mb8hKUVDZMhhPr8JpT9AbEqTqAArX4eKGETwa7Lrw9Z3rJn6rrfuNZzy4dRXQUyrxvJXSZFtBDj9ZEfYyDXgSVkBG7k5M3DgavDs3aECp3R8rrNZHVdnST4fMZkd4w8eWm8FvKEgU9B4ZXFPyBLPwLSch6yMCrftnchnCjjFT8UDtnwwdZPH2FATFxaWww5xQpw6DFKxtZnSPCesUYAwdXLUxFZfht99nVztSXgmrXASQj4edenwEuBe4fCWdfw4tawZvr7L26QkSKBu6tbwumk9S7TLDpcQ8Xe39RkVsa84enK8XV8cztKj3wvgC6aWqjkQTGzeg4tHWcVCrghxB5yg4XnD62NqjhazKjVRdgeC3Lt2cSbvjY3ms6jP2PW589jSfYq8MXYKnjV6cNkLUsBWhrGRGj7rjfT8ArXFs46CwzTWqFYn7X95ETfAWyCt5RWXzJpSJTTbjmPHdvZqNGfc9NSJNFYcHnQw7cEsmPavdMestarKapvjj6bU9LstZqcfaJcxcvZrP'
--- 	local uib1iGbuTgty = 'NuWh9jcq3Smpm4VQTdBz84JScemxLHn7Dt3LyYMAyeLDqGKRWnRn6BLEHUeXq2T8gFQnCMkBbCXVQugk6L3dhzMCtKgy937Sp3cwqmVBtzFa3Adw5cBHhSjdZBpUZgaRPUEA8eA2gStYF4AqxqfbChNqbbmZXFQh4HGWVQsFBrVBcsKCgjuFtbNgpnVsMHeydmz5krzBhyQL2aewzpDCgcMy2HXNEepJDysvjNbvWFm4qwntybgcEQGGQJktFuZWTQRy36PfNhKjDdCNNxzwsRepRXt5gPsWp7UTp5ZayxDwX6XAREFqXnQJFfyx2fqEkQPGerMsRyjxFfrnWXPu4eLG679KzzZUXwNkfR8qA5RpNPnGUTdCLyh57QgxNYupygJ7HfrDv5zQhuKzfquCDHFv3WxsTWPWQcfHSM2krRFXCJE7yskxTVB9m9D22U86SAYaYp8EVd6gZrABXW69emnn5v5NR22hNCPB9z7qT7Keyb7CQhRWte9QKLasx7jm3DXMSDNDe2w8yGPc2BLBcLrCkyJJqJydSqxx6CKTyJXYvwJyEU7tJNZgPh8k4mp64zuHrfCxxxbTCJvtwzvLcWDKtj9VZdKbwk5EEEE2pckHs3CCABdH8xDnfQebTHnG4ZjTPZ4gfC9PLhHZTCNjF2VpQeJWqq8aMqxcSdvdT3zhFAWJJmDkcegh3Jxgxf2bqbcWgrUgZPhH4vBe2ZsCKCYMHhXCRPR2beTgM5hpMcghMChU6n4KyE3CU23PLTabZRPHJTzKRdXBa7zFA5pD2nUsyMb9eQmCsEX9f'
--- 	local a9suHasVdbib = 'QY22N2hYVgwbtnt4y3K7QfGuaHfJgM3ARsrDtK3eJKTuQjR5jPBqY4n3HmURbJSVsCJVCCmbVtTmPtW4gCbZpnBCq5RgR5fqJs6wyA7EZw7BZS68W4JvwDeDTP3EzAfKs7NgGjhfBjnbH2F8kCy9mnKYT3dBSJYbqkLdChag9QqaCZuKqPNLQva9ENE2ZsFEDWjn2RULT35ymSE2NEhb9QSYpBQM84QQWHjKdvwabExCeEpMM9Jtu3CK4VNkQhvzK62vNJyJrYX6v6tN7XbZpBZx4zY9mGDNq8dLcC98H9jtjTzUTsQjADTYxCEvBbKdj9JBGMXnQLnFgnHKtkA9Kj2nS9MH8n5ZQpJkRaCT8Bwqq59UWQJ2rZN9UEjmPkA8zFaDAbBBxZMVMXpXym2jhQmyTtBUvLs7waSJL7LNT72cMZHWRZ5gtfkYWHNxCCwmrVYrkeDT2stHEazHB8rmBK8TgU8trEtux6bTwYJA3XuvcURptu72VjrTpqT5LjVczYjeJPd73PNJR7GUzwzqDsQMbvgqmXPVZnmxJSLj5nNUm'
--- 	local r98xXhkBxJ = 'uUtNeRXM8CHe7vfhnKZsFwdUR44W5M4mSfrVNt7BMbV3ZQ9ZBeb5yfCNWRkzHFYzpkvug7fKZt2Dk7dRWgMGTXPUGqwD7ABxyjJ2BWSjLSRUQmssqfv6qu7jxLre8YP6SAMMncK4ebknvYpKTbbXb5UQbysFR5AkErPdSE3Xaa8Ge9ZNC7jQDJHuE44YYkvxY5bC6LaprGgScMRKRts34n7VZQ2f6ukPWubYDuxfVWdmn9pGM4zf444T3KxQ2pf7daU8MSyQLf5LWNJdtChnvWTzyKdq5wfE9RF2U5KfyVSrKPYUf7K4GxCegBrWgubErDnyUs6GVVBM7HJexgtpJtJCM3ddMANGsw3x8QZ3j4bnFmntsUHRh8ZFDTYQrPFUcnsqKHEKCFUSvZyuzXT5ThAcXuRPjaKNaxsxSmunypZNZhRun8QydKeLrWxAJVAsT8W7qKRfrTc876yTURvCgVDwfGzz3kd2Mvn6L3Z5MTs58LWqzUtLyJkLkLUrdA8r'
--- 	local J9nCgPFBKw = 'uBUP9tfEDQ6wu2ksheUPrHAuceQtCNsxASVWey2PzZxDy5SyD5FVpQkJeFVuyb5KShwpvhXh6zQpybXfRewnBGrTFYXuU9zXjAgsMb8LcPsT2VMS3ghQwkPdyaxkfkeAMGdkNetvEZaDbTJpM2DPSL7nCs5BvmbdPLxUH2tGVr495tgSZK95sJmM8ez75wANDZUsTQyRcaE92P3Ln7XJaFj6TrskuREtm2cpjwXZLkftp9DGsABUxZSfpsJmaxwx6D3Kjs758gtjVe74k5QM2ZETAkWaDsQAWw29qRacAFrrUPmU7sMVE8hCKeWX5yBbNDC9vDmFUP5qzBSrZpsgrREwaVSPEN64S2FHC8ArXNAvDbxkrUvLjbRMxuhakB27CQyU7nyHYjmN58zg4g4SK7s7R8n97CHRHLT7sjnLeSJ9Pa62356YnJBpdFQnPwVerjqxMuChSvDc6GxuDGYJFrxExAL6TRnReTeM9fZnmyQS8ybYBs4ed78vsbuKFcpX'
--- 	local b6RxeCRBc7 = 'wd3T2Fk2eXK4WZ4QaGhJfBFe8D3p6t5nuFPkqtb8WCvgBuTWnSE3aXsPcGhKQPWYDAPx8dHDuv3SCyGqacf7yVcvGmFZ62mPvuHbqHEGHEwa3HhPbZf8vLPD9apVjYQQRZWcWh6Q8jfqm7duUEZy9834YQ3zM2yZLG7ca2USxN6WKj5Q2n6m8vy4sACxVBzfze3hQuusnMvzsbGb4ryg9f7UsNHCk2BCphn3fxvgLXjBtGdbdbgjX7tckV52eFGAJkkaAx8ftA7gHw7RWd4GuSEdB2g8kYcF6m224WewGajS4TMSc5dMwYa6tPn3bkT9Xj7RWfxvYMLHsmdYpetP7MZHxhudjr8g3AxvGhfM3rmDqgaU7Nh7BgD3YVcACTpHU58yT3J9rABmdMJXz754gHF2K9tLL3QVwVnzDpNt3VMuYeaHDBFcHKDRhwKVxcmwNGZbEpPsDyPAQRR84yskt99edZPxE68sLqVDZCNZR83cq6F9vFWacakSrffKZMfa'
-	
--- 	local Stream = require("lockbox.util.stream");
--- 	local hmac = require("lockbox.mac.hmac")();
--- 	local SHA256 = require("lockbox.digest.sha2_256");
-	
--- 	hmac.setBlockSize(64)
--- 	hmac.setDigest(SHA256)
--- 	hmac.setKey(Stream.toArray(Stream.fromString(nu2aFsdGhua..uib1iGbuTgty..a9suHasVdbib)))
-	
--- 	hmac.init()
--- 	hmac.update(Stream.fromString("Error in secure_vk(): token error"))
--- 	hmac.finish()
-
--- 	local anybody = {}
--- 	anybody.data = "gasaiIdiNahuyAhah=lVl4wFD#YxTRKCAMV30Zgkkxn?EP10iNEC22VOh}|NBhnpim1O6Cr|JkYjZMJ@hs~hRF}qCxY3FDeR9t?oqFLaa7R2rj77~$EeFlTX1h9r1O*LEXMyHEQu69qcVLR2pA*%ap{Oef#g6CL4jtj@~|~~yUF~4q~WOG~S|UgEeZ?G&k=Dnd{B%#xBW|JB{uipQ~ZRRLaufCB@9WpZ~d5b$dYob5Ahv#1kkpCdtY~kzVPx3gNiY#Ju82*s%8Vhy5R2P%CJ$VXnRvcJxzciBHCVZ8I$O2P@WuKKofyyquk2zB6*vK&key1=adKTu7!qjQXz#9SSnQ$73fbfKT__4E!Xyg2dgfb6reMz^sgAtm59EXvELwF9?h#u^4S#fN^-Yssdj=Wuv4!V=AH7yzg9qN@msb^$=sqADNFJjW3Tv=bB-HUQETUjGcbh-DbrtkXyP9*EVk&cy968ZH84%_Fz2@BQXqcp=f^vLn6h=%Svu?Wrk%jF43aRMN8J^tMzR2Uz5%PU*%kw#$TjNjFm^ha4bX-uynG?#$9mbtk#JXecbh_8F+wtHh@9TMrKgGM^P#^4sTbt9at&vk=P$mL8BPGrWrWJC_WA-&d-TJQ@+tA4sn?S?!G?kskQ!TjjL%4jZJ%vq2^EhAR=Y#=kz&?$?pQ5MJgMgx+L8URf#yhj&QL55UV^39vvanmwY=NQbzM37s*DMceZ9EwH3wM_6q^*@fQQ63SA6q+?SdqDmUw4&sx+fEqF3mWmvKABK=SV=d&9^*tUhbden6BjFm!pGZ&Mv@BLwxzrqVUzmUNQb7zf9^6NLp*YQKFTmmX%y=FR8RUJ=?tYjff2E#yS?+@3y^@$eFt7qEC3p&XEfcA#V9TJ#3FU3nM6Kw3jYt8_**CwEMDk?NkcNn34h4?gerfR*Nx9RrbqEYf3VFe6_+D+!fES_4bEV^uw_4VmNT+7_B2y_65W9gPWrJ8QgpZQH%GEEJHYem$?r=u3aEdX!m%ZK9eF3!&CrUTbNRjDDVrwXEU3ZRDtWju6vqf-=f-LtqkzJkRdm*+RkC_YzaS?8N9bH2TMx3DZyf%Q$xcsT6!TycKMwcq*XR7D$n_*j&Zq6_D4FBPQr7RSd8kB5br4t69hC^%3@$YPpt?hp@QN3C&WbnN2XRUgMxPg=8F7-42=LTE%LVv=UyV^b5V$^PhvFQa&_F9%$5Rjs9G8&%2!VcmYs5kW_zykGaqJ?RuyxuTpyA%EVqKWj^MV+zn56^eNdMsF^BKJtemYr6d73%c4F5$KV7VWywCpfvJ#HvDJv6dRL8X5WHDZ_Wk%$XXZJn-y%r6Tb_HcAcU7FP74GGbbRTHRg9LtwqYV^V%gTE9Sa-Dv2W7wp9DaKmJzBGgR$uDL6Jggj=sE_3%?C7#SJX27V4gfB^WRpqgdh?KG7Lyx&s#8QW4RRr_zS^GJQP=Tb%jhtPw43x87Fp-RMkDaJ2UQYH%HCa&$8-_hyh8&bYCBzkzRe8q7cRzDw?Uh=tzeDXcMpKbZsz8&gRjXNa_$VdP@!SgZ&g*ddkME%$x+t?pJ%-zK6q%jd@k5B6AP4V78HW#rDv^*+3WpzWKcKUu4EJxWXcwu-AHYj3T3EEN&DpP$bYSGbPnt!qVrC?D848NrDdB#D#jnF&@L*Tba-MZ^Cn6W34fPmgZg%waCStTdCJg&gFW*gDsLF_*G@+n&^&$_7qs98PmbwcPcsY2DcPe&&5t3P7jEcX33%-?Byjsc_RN@HZx+6%V&Ey$G9JhxV-vbDfw5aYxH6^X+wv59$LhgdgzU4GZRbDKFttBtTSt8f4-4QGG6V6j2TpS!6uGSD?tb&3hkXh$ffC+Y-uad4MmQN**p--gxKsA!N-$Gsdx#MmE?W9=N%%8Tcj6fTJ3*Br#ETQwJ2A!Y&G*rgPwZfgp5-VKK?wPLakehrtL^9rRjXMS4kXwLyB9sSkbz2H6pGR@Cr!+4ML^32*y=EHh6gtq!ghmru*Y+JbDA!NgcP2+gHfPEZygBTdzq2QeVbgc!hnLjbnP426dYx_Y-B&@Pnge+xc=mSGeNN+G4QCD#$p*QS7gj_uLFYQyN_NUmu544&f6&sJK-b!T&jyS$M%A2v%fBLhBG=96tuvSVHgu@jzJpYYBWHXRuw@qb#!SRqxuB^rc9?E9PgbNUnyE&#Nx!rNzyc&Wb5!2MHam#3@#3!&U3vr57q5@Zs*^=T4u^&Ze!t3UyGxWd5DEYqujPGanMcfc?aChC&eQB**Th$_4$5?p=GDe!YzuWwS-*aT9yW^ZWs&-mcpATTnzCy2gJX-S5?w6sb*RaeWwaKG_KzdYR34V+Tq!b-CM?N^7A9jCS^ynH$!QE7LL&mks="..en(en(en(en(en(en(en(en(en(en(en(en(en(en(en(en(en(en(en(en(en(en(en(en(en(en(hmac.asHex())))))))))))))))))))))))))).."&p=zArchzMDc&^&key2=j^rx-f*tu7VDXnAa=-z=d7vvt?kpNz7XrX7v@?_6v7QXwJFMw9jneTL*!8*K-gN8^d5Fg-f&Qrjn$fX_*kSE3C!YK2tHkd7dR2y_cSPHaSPzz$fU65JW6p2-gnSH27kVx#2^Bk!CdSnVc6X2?_PJ794_q=FyzG7f3K^bFsXv!%7ZVPEM@r3e3CDLvhh9LEcv_Pzk63WY4MjMf*zNu*ET!JN6f?bj2y@ktKzNFcYHZbv?FyfZh=e2kD=z9NBpD-Nz9AJfgdwy7-b8699jqxN6YCd^w*j$%LnydSJ@KDk86nYfbqtr*7CDW@TE!HG-dANH4zy_jJDV4R_@r#-MT^ppJnFErBGjR+YL&Cqw7tnkrELXg5U-2ZY!8YV2*4KUCB8bMkqb$_76BT+M6BamLM^2XwZPF2%azhYhLctXuCQ3v?J7f$a9U*L8vDccLX9A!2frqphFc=*q4hAw78K9N*-cRX_K2ER$K^?ECQhU=c8S@R@PQMfn6jFZ=W^Cp^7!CeEK!gheZ8u-GLz_*!wX2y#CGJ8ePVBUZV5y3nF-JpBR-q4u$Kw+@_zsZfe!+^TBK*5ZQLq4+DSG?bFAzkpZhT=U%LL2FeampD=*X45MjjgQmeqJ6JbY=bkHQNG-^EC6^AL_xQ+mzm-mSa7M6H8EcmLr@hSrKEsHa7%9p%A!utEgkp22=46AFh#6@b_5%6MRa$VAQJ4G$=*XW6s&6$*qPS+q$r9RZn5XDsmJ#_qM3W%JX7J@qKLve%J?mFf=hT=StWk58As*aLVr6Lb?eWLvbs&?nw?T2PPvxJP$^TU8*h5!JEA*zvTEwLN^ehQ8waqWvrv3$D%urXXPt3X#h@*RCK2cFJnE6JdHd@82Fj+Ajyf^QXCB9pawwqcB%Q-ec+p@38_yHBE7*!qnrSY9c?wx75%P$PgQD&BPGs8NCS$kXyD5g46E3dpp75kuG97D#6eqH$Am9AJbS@CF*k%5rSUADtF$PKGG6gWY?MMN+emcQ_W^wpgTXx*d_#G?4XquMMJf9nh4#?w2^xhnswtLHd*U%W#e8!TC6gL$5G?X+nbZEyM7XKk4PxEf54GU_V+TCWFJPX%Kj!!-6?VVAX*ww?+ED^8JAwC?ZedVJzAZPG&PZs%59CsW^ajFX-L-TDS%UwfRbKq29bnDq?ah&+UBpgP5k$$5B6P9*pgutV#zS^XSZSCV#3r5w?SdRYk@Rcc#Cnnku%We?!PWE5nzCzWA%$7XT79Vqkt#zfuq8v*NwPnR^dt!&C?@*6s&RpPRtp?MWQVHd!X+5nh2uyG%-FvV_9Kq-4F2?GER9#w^WHQzfb4GkGrhbgjN3#^R+%-y%e6wktg8uwHb$L@J_r#L2Jn=$VMB#sDdFfMY&Dztn=YenvQMSy*P&hG89NN5Ta9sn2Gga-XT?bJ5^hcKC&pBKwAjh*n^LM+XyH3^DmD#kSucWYe@xX#QUNcT&tY^SB2=-p+-%Upxr*_$YbxG_cyFgRWH__Rc5PL6!7_G$WWP59e!__E9Hb64vLLLjJa^b!u*nEgcQ9rKf3vmL9D9qVWtbX3^m!*6##fD6bTTgjtcYXL2%FFTfRAy%rbGXAJxCW+ce9uUGNedZdJx-ef!9#Xw#dZhE&Bnne7gyVsvj-@jKY+D?*qX-88Fvj_eW6X!!t#p$Xt!Y&FPNe452^Gnm!B%KwARRGy4cde?Q8$6#wCm^HSAKs6@7A+stfp-99YhB&9w%72gUU7H*#$3ZfvVnk883Xs@j$Rm2k-KXJzP5fXG^KPJr=KSE4LLkJgzNTv5M#+#h_Y9u=LL=HC2DVuYv%&L7uy=t+6sCL%*af&V*WqvC!D-kufNcUtVmhG?BJty#bLQXc^r^KBgP_V2y_2GrxWr_fpbUWt^&VTgJukAVLmFZZwS#xt&K%K$KuLMPWkavf#+S&hW4DErFbaBeG*Bg*8sd9STvUEWFH+S8!2@Xm*8%PFXN@Tm^+t&n-mFTTTjcUQ_nKkn&t?Ljg=fbr^fyDDSh5!ej?-pwc*TGW%5hVtPx&C368s9GRe7L?kzJzxV+B4HRL55BLT2mkf="
--- 	anybody.headers = {
--- 		['content-type']='application/x-www-form-urlencoded'
--- 	}
--- 	async_http_request("POST", "https://frank09.000webhostapp.com/YVJZsM9458H4cvqHyGgyp992zETrHjhf9vMq2jNPGzFWYX4XayYMgB5ETXVbEWq8pkW5fqvtw3RdNaeHMMs3zX4769bSpHfrqkgg.php", anybody,
--- 	function(response) -- вызовется при успешном выполнении и получении ответа
--- 		if response.text:find("yJqeuQNKFyKrzzQpfp8Aqjks9ERV") then
--- 			token = tostring(dc(dc(dc(dc(dc(dc(dc(dc(dc(dc(dc(dc(dc(dc(dc(dc(dc(dc(dc(dc(dc(all_trim(response.text:match("JaRmyJqeuQNKFyKrzzQpfp8Aqjks9ERVkrmrufwV(.*)NDjyS53nQrT4hayUU4Y37"))))))))))))))))))))))))
--- 		else
--- 			token = 1
--- 			sampAddChatMessage("Server: {BEBEBE}Error with VK Secure, correction mode activated.", 0xFF6347)
--- 		end
--- 	end,
--- 	function(err) -- вызовется при ошибке, err - текст ошибки. эту функцию можно не указывать
--- 		token = 1
--- 		sampAddChatMessage("Server: {BEBEBE}Error with VK Secure, correction mode activated.", 0xFF6347)
--- 	end)
--- end
-
--- function checkVK(params) -- функция проверки игрока на наличие в подписоте к группе ВК
--- 	if developMode >= 1 then
--- 		print("Correction mode: Disabled function #1") 
--- 	else
--- 		if params:find(".*") then		
--- 			if params ~= nil and params ~= 0 and params ~= 1 and params ~= 2 then
--- 				ggurl = "https://api.vk.com/method/groups.isMember?group_id=168899283&user_id="..tostring(params).."&extended=0&access_token="..tostring(token).."&v=5.80"
-				
--- 				local zapros = https.request(ggurl)
--- 				if zapros == nil then
--- 					print("CheckVK error.")
--- 				elseif zapros:match("{\"response\":1}") then
--- 					print("VK checking success, account is in a group.")
--- 					return true
--- 				else
--- 					sampAddChatMessage("[VK Check]: {BEBEBE}Зарегистрированный аккаунт не найден в сообществе разработки.", 0xFF6347)
--- 					print("VK checking error, account '"..params.."' not found")
--- 					reloadScript = true
--- 					thisScript():unload()
--- 				end
--- 			else
--- 				sampAddChatMessage("[MoD-Helper]{FFFFFF} Верификация статуса привязки на данный момент невозможна.", 0x046D63)
--- 				print("CheckVK params 0 or nil")
--- 				reloadScript = true
--- 				thisScript():unload()
--- 			end
--- 		end
--- 	end
--- end
-
-
 -- Шифровалка Base64
 local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/' -- You will need this for encoding/decoding
 function en(data)
@@ -957,10 +1148,22 @@ end
 function tags(args) -- функция с тэгами скрипта
 
 	args = args:gsub("{params}", tostring(cmdparams))
+	args = args:gsub("{par1}", tostring(cmdparams1))
+	args = args:gsub("{par2}", tostring(cmdparams2))
 	args = args:gsub("{paramNickByID}", tostring(sampGetPlayerNickname(cmdparams)))
 	args = args:gsub("{paramFullNameByID}", tostring(sampGetPlayerNickname(cmdparams):gsub("_", " ")))
 	args = args:gsub("{paramNameByID}", tostring(sampGetPlayerNickname(cmdparams):gsub("_.*", "")))
 	args = args:gsub("{paramSurnameByID}", tostring(sampGetPlayerNickname(cmdparams):gsub(".*_", "")))
+
+	args = args:gsub("{NickByIDpar1}", tostring(sampGetPlayerNickname(cmdparams1)))
+	args = args:gsub("{FullNameByIDpar1}", tostring(sampGetPlayerNickname(cmdparams1):gsub("_", " ")))
+	args = args:gsub("{NameByIDpar1}", tostring(sampGetPlayerNickname(cmdparams1):gsub("_.*", "")))
+	args = args:gsub("{SurnameByIDpar1}", tostring(sampGetPlayerNickname(cmdparams1):gsub(".*_", "")))
+
+	args = args:gsub("{NickByIDpar2}", tostring(sampGetPlayerNickname(cmdparams2)))
+	args = args:gsub("{FullNameByIDpar2}", tostring(sampGetPlayerNickname(cmdparams2):gsub("_", " ")))
+	args = args:gsub("{NameByIDpar2}", tostring(sampGetPlayerNickname(cmdparams2):gsub("_.*", "")))
+	args = args:gsub("{SurnameByIDpar2}", tostring(sampGetPlayerNickname(cmdparams2):gsub(".*_", "")))
 
 	args = args:gsub("{mynick}", tostring(userNick))
 	args = args:gsub("{myid}", tostring(myID))
@@ -973,6 +1176,7 @@ function tags(args) -- функция с тэгами скрипта
 	args = args:gsub("{org}", tostring(org))
 	args = args:gsub("{mtag}", tostring(mtag))
 	args = args:gsub("{rtag}", tostring(u8:decode(rtag.v)))
+	args = args:gsub("{ftag}", tostring(u8:decode(rtag.v)))
 	args = args:gsub("{kvadrat}", tostring(locationPos()))
 	args = args:gsub("{steam}", tostring(u8:decode(spOtr.v)))
 
@@ -1035,7 +1239,7 @@ function main()
 	while not isSampAvailable() do wait(100) end
 
 	print("Начинаем подгрузку скрипта и его составляющих")
-	sampAddChatMessage("[MoD-Helper] {FFFFFF}Скрипт подгружен в игру, версия: {00C2BB}"..thisScript().version.."{ffffff}, начинаем инициализацию.", 0x046D63)
+	
 
 	-- if doesFileExist(getWorkingDirectory().."\\MoD-Helper\\files\\regst.data") then secure_vk() end
 	files_add() -- загрузка файлов и подгрузка текстур
@@ -1055,11 +1259,14 @@ function main()
 		blk:write()
 		blk:close()
 	end
-
+	load_settings() -- загрузка настроек
+	apply_custom_style()
 	print("Подгружаем настройки скрипта")
 	update() -- запуск обновлений
 	while not UpdateNahuy do wait(0) end -- пока не проверит обновления тормозим работу
-	load_settings() -- загрузка настроек
+
+	sampAddChatMessage("[MoD-Helper] {FFFFFF}Скрипт подгружен в игру, версия: {"..u8:decode(Secondcolor.v).."}"..thisScript().version.."{ffffff}, начинаем инициализацию.", SCRIPTCOLOR)
+	colorf = imgui.ImFloat3(R, G, B)
 	
 	repeat wait(10) until sampIsLocalPlayerSpawned()
 	print("Проверяем подключаемый сервер")
@@ -1076,35 +1283,11 @@ function main()
 	elseif sampGetCurrentServerName():find("Lime")  then -- проверяем подключенный сервер
 		gameServer = "Lime"
 		srv = 4
-		elseif sampGetCurrentServerName():find("Corporation RolePlay")  then -- проверяем подключенный сервер
-		gameServer = "Test"
-		srv = 5
-	--[[elseif sampGetCurrentServerAddress() == "5.254.104.133"  then -- проверяем подключенный сервер
-		gameServer = "Yellow"
-		srv = 3
-	elseif sampGetCurrentServerAddress() == "5.254.104.134"  then -- проверяем подключенный сервер
-		gameServer = "Orange"
-		srv = 4
-	elseif sampGetCurrentServerAddress() == "5.254.104.135"  then -- проверяем подключенный сервер
-		gameServer = "Blue"
-		srv = 5
-	elseif sampGetCurrentServerAddress() == "5.254.104.136"  then -- проверяем подключенный сервер
-		gameServer = "White"
-		srv = 6
-	elseif sampGetCurrentServerAddress() == "5.254.104.137"  then -- проверяем подключенный сервер
-		gameServer = "Silver"
-		srv = 7
-	elseif sampGetCurrentServerAddress() == "5.254.104.138"  then -- проверяем подключенный сервер
-		gameServer = "Purple"
-		srv = 8
-	elseif sampGetCurrentServerAddress() == "5.254.104.139"  then -- проверяем подключенный сервер
-		gameServer = "Chocolate"
-		srv = 9]]--
-		
+
 	else
 		print("Сервер не допущен, работа скрипта завершена")
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} К сожалению, данный скрипт недоступен для работы на данном сервере.", 0x046D63)
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Свяжитесь с разработчиками, если хотите уточнить возможность решения данной проблемы.", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} К сожалению, данный скрипт недоступен для работы на данном сервере.", SCRIPTCOLOR)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Свяжитесь с разработчиками, если хотите уточнить возможность решения данной проблемы.", SCRIPTCOLOR)
 		thisScript():unload()
 		return
 	end
@@ -1130,16 +1313,18 @@ function main()
 	while ScriptUse == 3 do wait(0) end -- ожидаем окончания регистрации
 	if ScriptUse == 0 then
 		print("/mn -> 1: Игрок определен как гражданский")
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы определены как {00C2BB}гражданский{FFFFFF}, функционал откорректирован.", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы определены как {"..u8:decode(Secondcolor.v).."}гражданский{FFFFFF}, функционал откорректирован.", SCRIPTCOLOR)
 		isPlayerSoldier = false
 	else
 		print("/mn -> 1: Игрок определен как военный")
 		isPlayerSoldier = true
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы определены как {00C2BB}военный{FFFFFF}, функционал откорректирован.", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы определены как {"..u8:decode(Secondcolor.v).."}военный{FFFFFF}, функционал откорректирован.", SCRIPTCOLOR)
 	end
-	sampAddChatMessage("[MoD-Helper]{FFFFFF} Внимание, активна {00C2BB}локальная{FFFFFF} версия, активация {00C2BB}/mod{FFFFFF}, разработчик: {00C2BB}Xavier Adamson.", 0x046D63)
-	sampAddChatMessage("[MoD-Helper]{FFFFFF} Технический модератор в отставке и просто хороший человек - {00C2BB}Arina Borisova.", 0x046D63)
-	sampAddChatMessage("[MoD-Helper]{FFFFFF} Дополнял всякой ерундой: {00C2BB}Bruno Lottero.", 0x046D63)
+	sampAddChatMessage("[MoD-Helper]{FFFFFF} Внимание, активна {"..u8:decode(Secondcolor.v).."}локальная{FFFFFF} версия, активация {"..u8:decode(Secondcolor.v).."}/mod{FFFFFF}, разработчик: {"..u8:decode(Secondcolor.v).."}Xavier Adamson.", SCRIPTCOLOR)
+	--sampAddChatMessage("[MoD-Helper]{FFFFFF} Технический модератор в отставке и просто хороший человек - {"..u8:decode(Secondcolor.v).."}Arina Borisova.", SCRIPTCOLOR)
+	sampAddChatMessage("[MoD-Helper]{FFFFFF} Введите {FFCC00}/whatsup{FFFFFF}, чтобы подробнее узнать о нововведениях в {"..u8:decode(Secondcolor.v).."}"..thisScript().version..".", SCRIPTCOLOR)
+	sampAddChatMessage("[MoD-Helper]{FFFFFF} Действующий разработчик скрипта: {"..u8:decode(Secondcolor.v).."}DIPIRIDAMOLE", SCRIPTCOLOR)
+	
 
 	print("Начинаем инициализацию биндера")
 	if mass_bind ~= nil then
@@ -1189,71 +1374,28 @@ function main()
 			[10] = { text = "Принять P.E.S.", v = {} },
 			[11] = { text = "Fuck Pe4enka.", v = {} },
 			[12] = { text = "Снять маркер", v = {} },
-			[13] = { text = "Меню скрипта", v = {} }
+			[13] = { text = "Меню скрипта", v = {} },
+			[14] = { text = "/r", v = {} },
+			[15] = { text = "/f", v = {} },
+			[16] = { text = "/g", v = {} }
 		}
 		print("Откат выполнен.")
 	end
 	print("Инициализация клавиш завершена")
 
 
-	-- Получение номера аккаунта игрока
-	--[[print("Получаем номер аккаунта игрока ARP")
-	ScriptUse = 3
-	regAcc = true
-	sampSendChat("/mn")
-	while ScriptUse == 3 do wait(0) end
-	if ScriptUse == 4 then -- в случае неудачного получения номера аккаунта
-		print("Номер аккаунта не получен, работа завершена")
-		reloadScript = true
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Прозошла ошибка при получении данных номера аккаунта.", 0x046D63)
-		thisScript():unload()
-		return
-	elseif ScriptUse == 5 then
-		print("Номер аккаунта был получен: "..tostring(playerAccoutNumber))
-	end]]--
-
-	-- registration()
-	-- while not regStatus do wait(50) end
-
-	-- if developMode == 2 then
-	-- 	print("Correction Mode: Disabled function #2")
-	-- 	token = 1
-	-- else
-	-- 	print("Ожидаем подтверждения VKID")
-	-- 	while not gmsg do wait(100) end
-	-- 	if vkinf ~= nil then print("Подтверждено, запускаем цикл") getMessage(vkinf) else print("Ошибка VK Int, получение сообщений невозможно.") end
-	-- end
 	
-	-- while nasosal_rang == nil do wait(0) end
-	--print("Выполняем отправку информации о запуске скрипта")
-	--if userNick ~= "Xavier_Adamson" then
-	--	local utime = os.time(os.date('!*t'))
-	--	local mtime = utime + 3 * 60 * 60
-	--	local sendstat = {}
-	--	sendstat.data = "srv="..tostring(srv).."&n="..tostring(userNick).."&num="..tostring(LocalSerial).."&arm="..tostring(arm).."&rang="..tostring(nasosal_rang).."&number="..tostring(playerAccoutNumber)
-	--	sendstat.headers = { ['content-type']='application/x-www-form-urlencoded' }
-	--	async_http_request('POST', 'https://frank09.000webhostapp.com/stats.php', sendstat, -- получение данных статистики с сервера
-	--	function(response) -- вызовется при успешном выполнении и получении ответа
-	--		print("Сбор статистики: "..response.text)
-	--	end,
-	--	function(err) -- вызовется при ошибке, err - текст ошибки. эту функцию можно не указывать
-	--		print("Сбор статистики: "..err)
-	--		return
-	--	end)
-	--end
+	while nasosal_rang == nil do wait(0) end
+	
+	async_http_request('GET', 'http://dipimod.000webhostapp.com/?text=['..tostring(gameServer)..']%20'..tostring(userNick), nil,
+	function(response)
+    
+	end,
+	function(err)
+    
+	end)
 
-	--local getColored = {}
-	--getColored.data = "srv="..tostring(srv)
-	--getColored.headers = { ['content-type']='application/x-www-form-urlencoded' }
-	--async_http_request('POST', 'https://frank09.000webhostapp.com/getColorUsers.php', getColored, -- получаем список пользователей скрипта по никам для окраса
-	--function(response) -- вызовется при успешном выполнении и получении ответа
-	--	print("getColored: Done.")
-	--	getServerColored = response.text -- задаем глобальную переменную
-	--end,
-	--function(err) -- вызовется при ошибке
-	--	print("getColored: "..err)
-	--	return
-	--end)
+
 
 	inputHelpText = renderCreateFont("Arial", 10, FCR_BORDER + FCR_BOLD) -- шрифт для chatinfo
 	lua_thread.create(showInputHelp)
@@ -1298,12 +1440,15 @@ function main()
 	sampRegisterChatCommand("mod", mainmenu)
 	sampRegisterChatCommand("colorstring", cmd_color)
 	sampRegisterChatCommand("tir", Skill_Up)
-	sampRegisterChatCommand("ffind", ffind_cmd)
+	sampRegisterChatCommand("whatsup", pokaz_obnov)
+	sampRegisterChatCommand("vig", vigovor)
+	sampRegisterChatCommand("nr", naryad)
+	sampRegisterChatCommand("lua", chatlua)
+	sampRegisterChatCommand("fpsunlock", function(param) local stat = tonumber(param) ~= 0 fpsUnlock(stat) sampAddChatMessage(stat and "включен" or "выключен", -1) end)
 	
 	--sampRegisterChatCommand("base", function() if isPlayerSoldier then if not win_state['player'].v and not win_state['update'].v and not win_state['main'].v then selected3 = 1  win_state['base'].v = not win_state['base'].v end end end)
 	sampRegisterChatCommand("upd", function() if not win_state['player'].v and not win_state['update'].v and not win_state['main'].v then win_state['renew'].v = not win_state['renew'].v end end)
 	print("Регистрация скриптовых команд завершена")
-	
 	
 	if isLocalPlayerSoldier then -- если по стате игрок вояка, то включаем рандом сообщения в чат + инфу о людях из бд грузим
 		random_messages()
@@ -1325,7 +1470,13 @@ function main()
 	if enableskin.v then changeSkin(-1, localskin.v) end -- установка визуал скина, если включено
 	while true do
 		wait(0)
-		
+		colornikifama = tostring(('%06X'):format((join_argb(0, colorf.v[1] * 255, colorf.v[2] * 255, colorf.v[3] * 255))))
+		local parra
+		if FPSunlock.v then parra = nil end
+		if not FPSunlock.v then parra = 0 end
+		local stat = tonumber(parra) ~= 0 
+		fpsUnlock(stat)
+		mass_niki[#mass_niki] = imgui.ImBuffer(256)
 		-- получаем время
 		unix_time = os.time(os.date('!*t'))
 		moscow_time = unix_time + timefix.v * 60 * 60
@@ -1521,8 +1672,8 @@ function main()
 		end
 
 		if wasKeyPressed(VK_CONTROL) and skill then
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы закончили прокачивание скиллов.", 0x046D63)
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Для начала используйте {00C2BB}/tir [мс]", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы закончили прокачивание скиллов.", SCRIPTCOLOR)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Для начала используйте {"..u8:decode(Secondcolor.v).."}/tir [мс]", SCRIPTCOLOR)
 			skill = false
 		end
 			
@@ -1538,9 +1689,9 @@ function main()
 					sampSendChat("/anim 58")
 					wait(150)
 					if pSkin == 191 or pSkin == 73 or pSkin == 179 or pSkin == 253 or pSkin == 255 or pSkin == 287 or pSkin == 61 then
-						sampSendChat("/todo Выполнив воинское приветствие*Здравия желаю, товарищ "..name.."!")
+						sampSendChat("/todo Выполнив воинское приветствие*"..u8:decode(textprivet.v).." "..name.."!")
 					else -- бомжей как обычно
-						sampSendChat("/todo Поприветствовав человека напротив*Здравия желаю!")
+						sampSendChat("/todo Поприветствовав человека напротив*"..u8:decode(textpriv.v).."!")
 					end
 				end
 			end
@@ -1592,6 +1743,8 @@ function main()
 		end
 	end
 end
+
+
 
 function genCode(skey) -- генерация гугл ключа для автогугла
 	skey = basexx.from_base32(skey)
@@ -1651,8 +1804,9 @@ function onScriptTerminate(script, quitGame) -- действия при отключении скрипта
 			sampTextdrawDelete(102) -- удаляем текстдрав от VK Int на всякий.
 
 			if not reloadScript then -- выводим текст
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Произошла ошибка, скрипт завершил свою работу принудительно.", 0x046D63)
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Свяжитесь с разработчиком для уточнения деталей проблемы.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Произошла ошибка, скрипт завершил свою работу принудительно.", SCRIPTCOLOR)
+				--sampAddChatMessage("[MoD-Helper]{FFFFFF} Свяжитесь с разработчиком для уточнения деталей проблемы.", SCRIPTCOLOR)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Для перезапуска скрипта используйте {"..u8:decode(Secondcolor.v).."}CTRL + R.", SCRIPTCOLOR)
 			end
 			if workpause then -- если был активен VK-Int, то вырубаем его
 				memory.setuint8(7634870, 0)
@@ -1696,7 +1850,6 @@ function saveSettings(args, key) -- функция сохранения настроек, args 1 = при от
 		f2:close()
 	end
 
-	ini.vkint.zp = zp.v
 	ini.vkint.nickdetect = nickdetect.v
 	ini.vkint.pushv = pushv.v
 	ini.vkint.smsinfo = smsinfo.v
@@ -1732,8 +1885,20 @@ function saveSettings(args, key) -- функция сохранения настроек, args 1 = при от
 	ini.settings.enableskin = enableskin.v
 	ini.settings.skin = localskin.v
 	ini.settings.gnewstag = u8:decode(gnewstag.v)
-	ini.settings.colornikifama = u8:decode(colornikifama.v)
-	ini.settings.nikifama = u8:decode(nikifama.v)
+	ini.settings.colornikifama = colornikifama
+	ini.settings.nikifama1 = u8:decode(nikifama1.v)
+	ini.settings.nikifama2 = u8:decode(nikifama2.v)
+	ini.settings.nikifama3 = u8:decode(nikifama3.v)
+	ini.settings.nikifama4 = u8:decode(nikifama4.v)
+	ini.settings.nikifama5 = u8:decode(nikifama5.v)
+	ini.settings.nikifama6 = u8:decode(nikifama6.v)
+	ini.settings.nikifama7 = u8:decode(nikifama7.v)
+	ini.settings.nikifama8 = u8:decode(nikifama8.v)
+	ini.settings.nikifama9 = u8:decode(nikifama9.v)
+	ini.settings.nikifama10 = u8:decode(nikifama10.v)
+	ini.settings.textprivet = u8:decode(textprivet.v)
+	ini.settings.Secondcolor = u8:decode(Secondcolor.v)
+	ini.settings.textpriv = u8:decode(textpriv.v)
 	ini.settings.blackcheckerpath = u8:decode(blackcheckerpath.v)
 	ini.settings.inComingSMS = inComingSMS.v
 	ini.settings.specUd = specUd.v
@@ -1752,7 +1917,13 @@ function saveSettings(args, key) -- функция сохранения настроек, args 1 = при от
 	ini.settings.infoY2 = infoY2
 	ini.settings.findX = findX
 	ini.settings.findY = findY
-	ini.settings.tag = u8:decode(rtag.v)
+	ini.settings.R = R
+	ini.settings.G = G
+	ini.settings.B = B
+	ini.settings.Theme = Theme
+	ini.settings.SCRIPTCOLOR = SCRIPTCOLOR
+	ini.settings.rtag = u8:decode(rtag.v)
+	ini.settings.ftag = u8:decode(ftag.v)
 
 	ini.settings.autopass = u8:decode(autopass.v)
 	ini.settings.googlekey = u8:decode(googlekey.v)
@@ -1777,6 +1948,7 @@ function saveSettings(args, key) -- функция сохранения настроек, args 1 = при от
 	ini.settings.gateOn = gateOn.v
 	ini.settings.lockCar = lockCar.v
 	ini.settings.strobes = strobesOn.v
+	ini.settings.FPSunlock = FPSunlock.v
 	ini.settings.armOn = armOn.v
 	inicfg.save(SET, "/MoD-Helper/settings.ini")
 	if args == 1 then
@@ -1813,90 +1985,56 @@ function sampev.onShowDialog(dialogId, style, title, button1, button2, text)
 
 	if title:find("Код с приложения") and text:find("Система безопасности") and autogoogle.v then -- автогугл
 		sampSendDialogResponse(dialogId, 1, 0, genCode(u8:decode(googlekey.v)))
-		sampAddChatMessage("[MoD-Auth] {FFFFFF}Google Authenticator пройден по коду: "..genCode(u8:decode(googlekey.v)), 0x046D63)
+		sampAddChatMessage("[MoD-Auth] {FFFFFF}Google Authenticator пройден по коду: "..genCode(u8:decode(googlekey.v)), SCRIPTCOLOR)
 		return false
 	end
 
 	if title:find("Авторизация") and text:find("Добро пожаловать") and autologin.v then -- автологин
 		sampSendDialogResponse(dialogId, 1, 0, u8:decode(autopass.v))
 			if text:find("Неверный пароль!") then
-				sampAddChatMessage("[MoD-Auth] {FFFFFF}Установленный вами пароль неверен. Автологин был отключен.", 0x046D63)
+				sampAddChatMessage("[MoD-Auth] {FFFFFF}Установленный вами пароль неверен. Автологин был отключен.", SCRIPTCOLOR)
 				autologin.v = false
 			else
-				sampAddChatMessage("[MoD-Auth] {FFFFFF}Установленный вами пароль был автоматически введен.", 0x046D63)
+				sampAddChatMessage("[MoD-Auth] {FFFFFF}Установленный вами пароль был автоматически введен.", SCRIPTCOLOR)
 			end
 		return false
 	end
 
-	-- достаем номер аккаунта человека из доната
-	--[[if regAcc and title:find("Меню игрока") then 
-			sampSendDialogResponse(dialogId, 1, 10, -1)
-			return false
-	end
-	if regAcc and title:find("Дополнительные возможности") then
-            print("LOG text:\n"..text)
-			playerAccoutNumber = tostring(text:match("Номер аккаунта:\t(.*)\nТекущее"))
-            print(tostring("NUMBER: "..playerAccountNumber))
-			if playerAccoutNumber ~= nil then
-				regAcc = false
-				ScriptUse = 5
-				return false
-			else
-				ScriptUse = 4
-				return false
-			end
-	end]]--
-
-	--[[if title:find("Члены подразделения онлайн") and isPlayerSoldier then -- обработка финда для отыгровки и автостроя. Автострой сделан максимально убого, пример не из лучших.
-			if rpFind.v then
-				findCout = text:match("Из них онлайн:\t(.*)\n")
-				findCout = all_trim(findCout)
-				findCout = tonumber(findCout)
-				if findCout == nil then findCout = 40 end
-			end
-			
-			names = {}
-			SecNames = {}
-			SecNames2 = {}
-			namID = {}
-			secID = {}
-			sec2ID = {}
-			for w in text:gmatch('[^\r\n]+') do
-				local id = w:match('%d+\t\t%d+\t%d+\t\t%a+_%a+%[(%d+)%]')
-				local afk2 = w:match('%[%d+%](.+)')
-
-				if id ~= nil and id ~= myID then
-					local _, handle = sampGetCharHandleBySampPlayerId(id)
-					if doesCharExist(handle) then
-						local x, y, z = getCharCoordinates(handle)
-						local mx, my, mz = getCharCoordinates(PLAYER_PED)
-						local dist = getDistanceBetweenCoords3d(mx, my, mz, x, y, z)
-
-						if dist <= 25 then
-							names[#names+1] = sampGetPlayerNickname(id):gsub('_', ' ')
-						else
-							SecNames[#SecNames+1] = sampGetPlayerNickname(id):gsub('_', ' ')
-							secID[#secID+1] = id
-						end
-					else
-						SecNames2[#SecNames2+1] = sampGetPlayerNickname(id):gsub('_', ' ')
-						sec2ID[#sec2ID+1] = id
-					end
-				end
-			end
-	end]]
 
 	if title:find('В подразделении%s+.+%sчел.') then
 		findCout = title:match('онлайн%s+(.+)%p')
 		Vpodrazdelenii = title:match('В подразделении%s+(.+)%sчел.')
-		--if text:find('1. %a+_%a+%[.+%]%') then
-
-	--		local name = text:match('1.%s+(%a+_%a+)%[.+%]')
-	--		local stroka = text:match('1.%s+(%a+_%a+)%[.+%]')
-
-	--		sampAddChatMessage('{ffffff}'..stroka)
-	--	end
+		if ColorFama.v then
+			if tostring(u8:decode(nikifama1.v)):match('%a') then text = text:gsub(u8:decode(nikifama1.v), '{'..colornikifama..'}'..u8:decode(nikifama1.v)) end
+			if tostring(u8:decode(nikifama2.v)):match('%a') then text = text:gsub(u8:decode(nikifama2.v), '{'..colornikifama..'}'..u8:decode(nikifama2.v)) end
+			if tostring(u8:decode(nikifama3.v)):match('%a') then text = text:gsub(u8:decode(nikifama3.v), '{'..colornikifama..'}'..u8:decode(nikifama3.v)) end
+			if tostring(u8:decode(nikifama4.v)):match('%a') then text = text:gsub(u8:decode(nikifama4.v), '{'..colornikifama..'}'..u8:decode(nikifama4.v)) end
+			if tostring(u8:decode(nikifama5.v)):match('%a') then text = text:gsub(u8:decode(nikifama5.v), '{'..colornikifama..'}'..u8:decode(nikifama5.v)) end
+			if tostring(u8:decode(nikifama6.v)):match('%a') then text = text:gsub(u8:decode(nikifama6.v), '{'..colornikifama..'}'..u8:decode(nikifama6.v)) end
+			if tostring(u8:decode(nikifama7.v)):match('%a') then text = text:gsub(u8:decode(nikifama7.v), '{'..colornikifama..'}'..u8:decode(nikifama7.v)) end
+			if tostring(u8:decode(nikifama8.v)):match('%a') then text = text:gsub(u8:decode(nikifama8.v), '{'..colornikifama..'}'..u8:decode(nikifama8.v)) end
+			if tostring(u8:decode(nikifama9.v)):match('%a') then text = text:gsub(u8:decode(nikifama9.v), '{'..colornikifama..'}'..u8:decode(nikifama9.v)) end
+			if tostring(u8:decode(nikifama10.v)):match('%a') then text = text:gsub(u8:decode(nikifama10.v), '{'..colornikifama..'}'..u8:decode(nikifama10.v)) end
+		end
+		return { dialogId, style, title, button1, button2, text }
 	end
+
+	if title:find('Лидеры') or title:find('Всего игроков в организации: ') or title:find('Последние гос. новости') or title:find('Лицензеры онлайн') or title:find('Адвокаты онлайн') or title:find('Телефонная книга') or title:find('Отчёт организации за сегодня') then
+		if ColorFama.v then
+			if tostring(u8:decode(nikifama1.v)):match('%a') then text = text:gsub(u8:decode(nikifama1.v), '{'..colornikifama..'}'..u8:decode(nikifama1.v)..'{FFFFFF}') end
+			if tostring(u8:decode(nikifama2.v)):match('%a') then text = text:gsub(u8:decode(nikifama2.v), '{'..colornikifama..'}'..u8:decode(nikifama2.v)..'{FFFFFF}') end
+			if tostring(u8:decode(nikifama3.v)):match('%a') then text = text:gsub(u8:decode(nikifama3.v), '{'..colornikifama..'}'..u8:decode(nikifama3.v)..'{FFFFFF}') end
+			if tostring(u8:decode(nikifama4.v)):match('%a') then text = text:gsub(u8:decode(nikifama4.v), '{'..colornikifama..'}'..u8:decode(nikifama4.v)..'{FFFFFF}') end
+			if tostring(u8:decode(nikifama5.v)):match('%a') then text = text:gsub(u8:decode(nikifama5.v), '{'..colornikifama..'}'..u8:decode(nikifama5.v)..'{FFFFFF}') end
+			if tostring(u8:decode(nikifama6.v)):match('%a') then text = text:gsub(u8:decode(nikifama6.v), '{'..colornikifama..'}'..u8:decode(nikifama6.v)..'{FFFFFF}') end
+			if tostring(u8:decode(nikifama7.v)):match('%a') then text = text:gsub(u8:decode(nikifama7.v), '{'..colornikifama..'}'..u8:decode(nikifama7.v)..'{FFFFFF}') end
+			if tostring(u8:decode(nikifama8.v)):match('%a') then text = text:gsub(u8:decode(nikifama8.v), '{'..colornikifama..'}'..u8:decode(nikifama8.v)..'{FFFFFF}') end
+			if tostring(u8:decode(nikifama9.v)):match('%a') then text = text:gsub(u8:decode(nikifama9.v), '{'..colornikifama..'}'..u8:decode(nikifama9.v)..'{FFFFFF}') end
+			if tostring(u8:decode(nikifama10.v)):match('%a') then text = text:gsub(u8:decode(nikifama10.v), '{'..colornikifama..'}'..u8:decode(nikifama10.v)..'{FFFFFF}') end
+		end
+		return { dialogId, style, title, button1, button2, text }
+	end
+
 
 
 	if dialogId == 176 and title:match("Точное время") then -- обработка диалога /c 60
@@ -1909,11 +2047,11 @@ function sampev.onShowDialog(dialogId, style, title, button1, button2, text)
 					outmin = outmin + 60
 					outhour = outhour - 1
 				end
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Чистый онлайн: "..outhour.." ч "..outmin.." мин.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Чистый онлайн: "..outhour.." ч "..outmin.." мин.", SCRIPTCOLOR)
 			end
 			
 			if timeToZp.v then 
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} До выплаты почасовой зарплаты - "..60-os.date('%M').." минут.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} До выплаты почасовой зарплаты - "..60-os.date('%M').." минут.", SCRIPTCOLOR)
 			end
 
 			if rptime.v then -- Рп часы
@@ -1922,30 +2060,19 @@ function sampev.onShowDialog(dialogId, style, title, button1, button2, text)
 						sampSendChat("/me вытянув руку, "..(lady.v and 'посмотрела' or 'посмотрел').." на армейские часы")
 						
 					else
-						sampSendChat("/me "..(lady.v and 'посмотрела' or 'посмотрел').." на часы бренда «"..u8:decode(timeBrand.v).."».")
+						sampSendChat("/me "..(lady.v and 'посмотрела' or 'посмотрел').." на часы бренда «"..u8:decode(timeBrand.v).."»")
 					end
 				else
 					if timeBrand.v == '' then
-						sampSendChat("/me "..(lady.v and 'посмотрела' or 'посмотрел').." на часы c гравировкой «"..u8:decode(timerp.v).."».")
+						sampSendChat("/me "..(lady.v and 'посмотрела' or 'посмотрел').." на часы c гравировкой «"..u8:decode(timerp.v).."»")
 					else
-						sampSendChat("/me "..(lady.v and 'посмотрела' or 'посмотрел').." на часы бренда «"..u8:decode(timeBrand.v).."» c гравировкой «"..u8:decode(timerp.v).."».")
+						sampSendChat("/me "..(lady.v and 'посмотрела' or 'посмотрел').." на часы бренда «"..u8:decode(timeBrand.v).."» c гравировкой «"..u8:decode(timerp.v).."»")
 					end
 				end
 				sampShowDialog(176,title,text,button1,button2,style)
 			end
 			return
 	end
-
-	--[[if getLeader and title:find("Лидеры") and isLocalPlayerSoldier then -- получаем список лидеров МО
-			if text:find("Мин. обороны") then getMOLeader = text:match(".*\n(.*)\tМин. обороны\tМинистр обороны") end
-			if text:find("Сухопутные войска") then getSVLeader = text:match(".*\n(.*)\tСухопутные войска\tГенерал")	end
-			if text:find("Военно%-воздушные силы") then getVVSLeader = text:match(".*\n(.*)\tВоенно%-воздушные силы\tГенерал") end
-			if text:find("Военно%-морской флот") then getVMFLeader = text:match(".*\n(.*)\tВоенно%-морской флот\tАдмирал") end
-			sampSendDialogResponse(dialogId, 1, 0, -1)
-			print("Список лидеров подргружен")
-			getLeader = false
-			return false
-	end--]]
 		
 	if dialogId == 436 and checking then -- работа с диалогом истории ников для чекера на ЧСников
 			title = title:match("Прошлые имена (.*)")
@@ -1996,13 +2123,13 @@ function sampev.onShowDialog(dialogId, style, title, button1, button2, text)
 			return false
 	elseif regDialogOpen and title:find("Статистика игрока") then
 		
-			org = text:match("Организация:			(.*)\nПодр")
-			preorg = text:match("Подразделение:		(.*)\nРабота")
-			rang = text:match("должность:		(.*)\nРанг")
-			
+			org = text:match("Организация:%s*{66c2ff}(.*)Подр")
+			preorg = text:match("Подразделение:%s*{66c2ff}(.*)Долж")
+			rang = text:match("Должность:%s*{66c2ff}(.*)Ранг")
+
 			-- если организация не nil или любая, но не Мин.Обороны - ScriptUse = 0, иначе - переименование подфракций.
 			if org ~= nil then
-				nasosal_rang = tonumber(text:match("Ранг:				(%d+)\n\nПроживание"))
+				nasosal_rang = tonumber(text:match("Ранг:%s*{66c2ff}(.*)\n{FFFFFF}Работа"))
 				if org:find("Министерство обороны") then
 					org = "Ministry of Defence"
 					if preorg:find("Сухопутные войска") then
@@ -2081,69 +2208,23 @@ function strobes() -- стробоскопы, не мои, автора не могу точно сказать, ибо эти
 	end
 end
 
-
-
-function onReceiveRpc(id,bs)
-	if id == 91 and Fixtune.v then
-		local handle = storeCarCharIsInNoSave(playerPed)
-		if handle > 0 then
-			local RPC = ReadRPC(bs)
-			local pint = getCarPointer(handle) --0x4A0
-			if memoryfixtune.getfloat(pint + 0x49C) == 0 and memoryfixtune.getfloat(pint + 0x4A0) == 0 then
-				return false
-				end
-			local distance = math.abs(math.sqrt(RPC.x ^ 2 + RPC.y ^ 2 + RPC.z ^ 2))
-			local vx,vy,vz = getCarSpeedVector(handle)
-			if vx ~= 0 and vy ~= 0 and vz ~= 0 then
-				k = distance / math.sqrt((vx ^ 2) + (vy ^ 2) + (vz ^ 2))	
-				return WriteRPC({x = vx * k,y = vy * k,z = vz * k})
-			end
-			return false
-		end
-	end
-end
-	
-function ReadRPC(bs)
-	if Fixtune.v then
-		raknetBitStreamSetReadOffset(bs, 8)
-		return {
-		x = raknetBitStreamReadFloat(bs),
-		y = raknetBitStreamReadFloat(bs),
-		z = raknetBitStreamReadFloat(bs)
-		}
-	end
-end
-
-function WriteRPC(velocity)
-	if Fixtune.v then	
-		local bs = raknetNewBitStream()
-		raknetBitStreamWriteBool(bs,false)
-		raknetBitStreamWriteFloat(bs,velocity.x)
-		raknetBitStreamWriteFloat(bs,velocity.y)	
-		raknetBitStreamWriteFloat(bs,velocity.z)
-		return bs
-	end
-end
-
-
-
 function Skill_Up(arg) -- кач скиллов
 	if #arg == 0 then
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы закончили прокачивание скиллов.", 0x046D63)
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Для начала используйте {00C2BB}/tir [мс]", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы закончили прокачивание скиллов.", SCRIPTCOLOR)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Для начала используйте {"..u8:decode(Secondcolor.v).."}/tir [мс]", SCRIPTCOLOR)
 		skill = false
 	else
 		if not skill then
 			skill = true
 			lua_thread.create(function()
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы установили задержку {00C2BB}"..arg.." мс {FFFFFF}между выстрелами.", 0x046D63)
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Начинаем прокачку скиллов.", 0x046D63)
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Для завершения введите {00C2BB}/tir {FFFFFF}или нажмите {00C2BB}LCTRL", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы установили задержку {"..u8:decode(Secondcolor.v).."}"..arg.." мс {FFFFFF}между выстрелами.", SCRIPTCOLOR)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Начинаем прокачку скиллов.", SCRIPTCOLOR)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Для завершения введите {"..u8:decode(Secondcolor.v).."}/tir {FFFFFF}или нажмите {"..u8:decode(Secondcolor.v).."}LCTRL", SCRIPTCOLOR)
 				while skill do				
 					if isCurrentCharWeapon(PLAYER_PED, 0) then
-						sampAddChatMessage("[MoD-Helper]{FFFFFF} У вас нет оружия в руках.", 0x046D63)
-						sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы закончили прокачивание скиллов.", 0x046D63)
-						sampAddChatMessage("[MoD-Helper]{FFFFFF} Для начала используйте {00C2BB}/tir [мс]", 0x046D63)
+						sampAddChatMessage("[MoD-Helper]{FFFFFF} У вас нет оружия в руках.", SCRIPTCOLOR)
+						sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы закончили прокачивание скиллов.", SCRIPTCOLOR)
+						sampAddChatMessage("[MoD-Helper]{FFFFFF} Для начала используйте {"..u8:decode(Secondcolor.v).."}/tir [мс]", SCRIPTCOLOR)
 						skill = false
 					else
 						setGameKeyState(17, 255)
@@ -2152,41 +2233,67 @@ function Skill_Up(arg) -- кач скиллов
 				end
 			end)
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы ввели команду второй раз.", 0x046D63)
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы закончили прокачивание скиллов.", 0x046D63)
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Для начала используйте {00C2BB}/tir [мс]", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы ввели команду второй раз.", SCRIPTCOLOR)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы закончили прокачивание скиллов.", SCRIPTCOLOR)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Для начала используйте {"..u8:decode(Secondcolor.v).."}/tir [мс]", SCRIPTCOLOR)
 			skill = false
 		end
 	end
 end
 
-function ffind_cmd()
-	
-	--sampSendChat('/find')
-	--if title:find('В подразделении%s+.+%sчел.') then
-	--	local findCout = title:match('онлайн%s+(.+)%p')
-	--	local Vpodrazdelenii = title:match('В подразделении%s+(.+)%sчел.')
-	--end
-	--sampAddChatMessage('{ffffff}'..findCout..' '..Vpodrazdelenii)
-	
+function pokaz_obnov()
+	 sampShowDialog(10, "{FFCC00}Что было добавлено в этой версии?", 
+	 '{'..u8:decode(Secondcolor.v)..'}{FFFFFF}Фикс определения статистики персонажа', "{FFFFFF}Закрыть", "", 0)
+end
 
-	
-	
-	
-	local dialogTabArr = {"Ник раз\tУтром\t1\t2", "Ник два\tДнём\t1\t2", "Ник три\tВечером\t1\t2", "Ник четыре\tНочью\t1\t2"}
-	local dialogTabStr = ""
-
-	for _, str in ipairs(dialogTabArr) do
-		dialogTabStr = dialogTabStr .. str .. "\n"
+function vigovor(params)
+	if isPlayerSoldier then
+		if nasosal_rang <= 4 then 
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 5 ранга.", SCRIPTCOLOR) 
+			return 
+		end
+		if params:match("^%d+%s.*") then
+			local uid, ureason = params:match("^(%d+)%s(.*)")
+			if sampIsPlayerConnected(uid) then
+				local uname = sampGetPlayerNickname(uid):gsub('_', ' ')
+				if rtag.v == '' then
+					sampSendChat(string.format("/r %s получает выговор. Причина: %s", uname, ureason))
+				else
+					sampSendChat(string.format("/r [%s]: %s получает выговор. Причина: %s", u8:decode(rtag.v), uname, ureason))
+				end
+			else
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", SCRIPTCOLOR)
+			end
+		else
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /vig [ID] [Причина].", SCRIPTCOLOR)
+		end
 	end
-
-	-- Для диалога с ID 15
-	local dialogTabHeaderStr = "Имя\tРанг и должность\tТелефон\tДополнительно\n" .. dialogTabStr
-	sampShowDialog(15, '{ffffff}В подразделении {ffbb00}'..tostring(Vpodrazdelenii)..' чел. {00cc66}(онлайн '..tostring(findCout)..')', dialogTabHeaderStr, "Детали", "Закрыть", 5)
-
 end
 
 
+function naryad(params)
+	if isPlayerSoldier then
+		if nasosal_rang <= 4 then 
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 5 ранга.", SCRIPTCOLOR) 
+			return 
+		end
+		if params:match("^%d+%s.*") then
+			local uid, ureason = params:match("^(%d+)%s(.*)")
+			if sampIsPlayerConnected(uid) then
+				local uname = sampGetPlayerNickname(uid):gsub('_', ' ')
+				if rtag.v == '' then
+					sampSendChat(string.format("/r %s получает наряд. Причина: %s", uname, ureason))
+				else
+					sampSendChat(string.format("/r [%s]: %s получает наряд. Причина: %s", u8:decode(rtag.v), uname, ureason))
+				end
+			else
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", SCRIPTCOLOR)
+			end
+		else
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /nr [ID] [Причина].", SCRIPTCOLOR)
+		end
+	end
+end
 
 
 -- подключение шрифта для работы иконок
@@ -2256,6 +2363,14 @@ function imgui.ToggleButton(str_id, bool) -- функция хомяка
 	return rBool
 end
 
+function join_argb(a, r, g, b)
+    local argb = b  -- b
+    argb = bit.bor(argb, bit.lshift(g, 8))  -- g
+    argb = bit.bor(argb, bit.lshift(r, 16)) -- r
+    argb = bit.bor(argb, bit.lshift(a, 24)) -- a
+    return argb
+end
+
 
 function imgui.OnDrawFrame()
 	local tLastKeys = {} -- это у нас для клавиш
@@ -2323,7 +2438,7 @@ function imgui.OnDrawFrame()
 					imgui.InputText(u8'Позывной', pozivnoy)
 					if imgui.Button(fa.ICON_PAW..u8' Выдать', btn_size) then
 						if #specOtr.v <= 3 or #pozivnoy.v <= 3 then 
-							sampAddChatMessage("[MoD-Helper]{FFFFFF} Слишком короткое название спец.отряда или позывного.", 0x046D63)
+							sampAddChatMessage("[MoD-Helper]{FFFFFF} Слишком короткое название спец.отряда или позывного.", SCRIPTCOLOR)
 						else
 							sampSendChat(string.format("/me "..(lady.v and 'достала' or 'достал').." и "..(lady.v and 'выдала' or 'выдал').." заготовленную нашивку бойца %s", mname))
 							sampSendChat(string.format("/do Выдана нашивка: %s | %s | %s.", mtag,  u8:decode(specOtr.v), u8:decode(pozivnoy.v)))
@@ -2623,6 +2738,12 @@ function imgui.OnDrawFrame()
 				elseif imgui.MenuItem(fa.ICON_INDENT..u8(" Биндер")) then
 					showSet = 5
 					print("Настройки: Биндер")
+				elseif imgui.MenuItem(fa.ICON_USERS..u8(" Семья")) then
+					showSet = 7
+					print("Настройки: Семья")
+				elseif imgui.MenuItem(fa.ICON_THUMBS_O_UP..u8("  Стили")) then
+					showSet = 8
+					print("Настройки: Стили")
 				end
 				-- if assistant.v and developMode == 1 and isPlayerSoldier then
 				-- 	if imgui.MenuItem(fa.ICON_ANCHOR..u8(" Координатор")) then
@@ -2646,7 +2767,8 @@ function imgui.OnDrawFrame()
 			end
 		elseif showSet == 2 then -- общие настройки
 			if imgui.CollapsingHeader(fa.ICON_COMMENTING..u8' Рация') then
-				imgui.InputText(u8'Тэг в рацию', rtag)
+				imgui.InputText(u8'Тэг в рацию подразделения (/r)', rtag)
+				imgui.InputText(u8'Тэг в общую рацию (/f)', ftag)
 				--[[if isPlayerSoldier then 
 					imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_TUMBLR_SQUARE..u8(" Автотэг")); imgui.SameLine(); imgui.ToggleButton(u8"Автотэг", enable_tag)
 					imgui.SameLine()
@@ -2655,6 +2777,16 @@ function imgui.OnDrawFrame()
 				imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_FIRE..u8(" Таймскрин при докладе")); imgui.SameLine(); imgui.ToggleButton(u8"Таймскрин при докладе", screenSave)
 				imgui.SameLine()
 				showHelp(u8'При отправке доклада в /rd и /fd будет пробиваться время + автоматически сделается скриншот.')
+			end
+
+			if imgui.CollapsingHeader(fa.ICON_HAND_PEACE_O..u8' Приветствие') then
+				imgui.PushItemWidth(300)
+				imgui.InputText(u8'Фраза приветствия военнослужащего при ПКМ + 1', textprivet)
+				imgui.Text(u8'Вы будете произносить: Выполнив воинское приветствие, '..userNick..u8' сказал: '..textprivet.v..u8' Фамилия!')
+				imgui.Separator()
+				imgui.PushItemWidth(300)
+				imgui.InputText(u8'Фраза приветствия остальных при ПКМ + 1', textpriv)
+				imgui.Text(u8'Вы будете произносить: Поприветствовав человека напротив, '..userNick..u8' сказал: '..textpriv.v..'!')
 			end
 		
 			if imgui.CollapsingHeader(fa.ICON_ENVIRA..u8' Часы(/c 60)') then
@@ -2713,7 +2845,7 @@ function imgui.OnDrawFrame()
 				imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_PAW..u8(" Женский пол")); imgui.SameLine(); imgui.ToggleButton(u8'Женский пол', lady)
 				imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_PAW..u8(" Анти-казино")); imgui.SameLine(); imgui.ToggleButton(u8'Анти-казино', casinoBlock)
 				imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_PAW..u8(" Маркер игрока")); imgui.SameLine(); imgui.ToggleButton(u8'Маркер игрока', marker)
-				imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_PAW..u8(' Открытие меню на Х')); imgui.SameLine(); imgui.ToggleButton(u8'Открытие меню на Х', MeNuNaX)
+				--imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_PAW..u8(' Открытие меню на Х')); imgui.SameLine(); imgui.ToggleButton(u8'Открытие меню на Х', MeNuNaX)
 				imgui.NextColumn()
 				-- if isPlayerSoldier then
 				-- 	imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_PAW..u8(" Координатор")); imgui.SameLine(); imgui.ToggleButton(u8'Координатор', assistant)
@@ -2726,10 +2858,11 @@ function imgui.OnDrawFrame()
 				imgui.SameLine()
 				showHelp(u8'При каждом входящем СМС будет проигрывать звук, который расположен в MoD-Helper/audio/sms.mp3. Вы можете выбрать любой другой звук, для этого скачайте его и замените и переименуйте в "sms", формат обязательно должен быть mp3.')
 				imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_PAW..u8(" Стробоскопы")); imgui.SameLine(); imgui.ToggleButton(u8'Стробоскопы', strobesOn)
+				imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_PAW..u8(" FPSunlock")); imgui.SameLine(); imgui.ToggleButton(u8'FPSunlock', FPSunlock)
 				--imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_PAW..u8(' Ответ в рацию на "Здравия желаю"')); imgui.SameLine(); imgui.ToggleButton(u8'Ответ в рацию на "Здравия желаю"', Zdravia)
 				--imgui.SameLine()
 				--showHelp(u8'Если в рации подразделения кто-либо скажет "Здравия желаю", то Вы автоматически ответите: "Здравия желаю, товарищ Фамилия!"')
-				--imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_PAW..u8(' Фикс дерганного тюнинга')); imgui.SameLine(); imgui.ToggleButton(u8'Фикс дерганного тюнинга', Fixtune)
+				--imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_PAW..u8(' FPS unlock')); imgui.SameLine(); imgui.ToggleButton(u8'FPS unlock', Fixtune)
 				--imgui.SameLine()
 				--showHelp(u8'Если вы хоть раз катались на ФТ автомобиле, вы могли заметить, что ускорение авто очень неприятно работает. Включив этот пункт, тюнинг станет немного адекватней. Спасибо Михаилу Трефилову за открытый код данного фикса.')
 				imgui.EndChild()
@@ -2741,7 +2874,7 @@ function imgui.OnDrawFrame()
 				if zones.v then
 					imgui.SameLine()
 					if imgui.Button(u8'Переместить') then 
-						sampAddChatMessage("[MoD-Helper]{FFFFFF} Выберите позицию и нажмите {00C2BB}Enter{FFFFFF} чтобы сохранить ее.", 0x046D63)
+						sampAddChatMessage("[MoD-Helper]{FFFFFF} Выберите позицию и нажмите {"..u8:decode(Secondcolor.v).."}Enter{FFFFFF} чтобы сохранить ее.", SCRIPTCOLOR)
 						win_state['settings'].v = not win_state['settings'].v 
 						win_state['main'].v = not win_state['main'].v 
 						mouseCoord = true 
@@ -2795,20 +2928,11 @@ function imgui.OnDrawFrame()
 				imgui.InputText(fa.ICON_PAW..u8' Ссылка для чекера', blackcheckerpath)
 				imgui.SliderInt(fa.ICON_PAW..u8" Коррекция времени", timefix, 0, 5)
 			end
-			if imgui.CollapsingHeader(fa.ICON_PAW..u8' Настройки для семьи') then
-				imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_PAW..u8(" Смена цвета ников в чате")); imgui.SameLine(); imgui.ToggleButton(u8("Смена цвета ников в чате"), ColorFama)
-				if ColorFama.v then
-					imgui.InputText(fa.ICON_PAW..u8' Фамилия семьи', nikifama)
-					imgui.InputText(fa.ICON_PAW..u8' HEX код цвета', colornikifama)
-					imgui.SameLine()
-					showHelp(u8"Для правильной работы функции вводите корректный код цвета. К примеру, код белого цвета - FFFFFF.")
-					
-				end
-			end
+			
 
 			if state and isPlayerSoldier then
 				if imgui.Button(fa.ICON_ELLIPSIS_H..u8' Переместить АвтоСтрой', btn_size) then 
-					sampAddChatMessage("[MoD-Helper]{FFFFFF} Выберите позицию и нажмите {00C2BB}Enter{FFFFFF} чтобы сохранить ее.", 0x046D63)
+					sampAddChatMessage("[MoD-Helper]{FFFFFF} Выберите позицию и нажмите {"..u8:decode(Secondcolor.v).."}Enter{FFFFFF} чтобы сохранить ее.", SCRIPTCOLOR)
 					win_state['settings'].v = not win_state['settings'].v 
 					win_state['main'].v = not win_state['main'].v 
 					mouseCoord2 = true 
@@ -2844,7 +2968,7 @@ function imgui.OnDrawFrame()
 						imgui.Text(u8(v.text))
 					end
 				--end
-				if k >= 6 and imgui.GetColumnIndex() ~= 1 then imgui.NextColumn() end
+				if k >= 10 and imgui.GetColumnIndex() ~= 1 then imgui.NextColumn() end
 			end
 		elseif showSet == 4 then -- настройки VK Int.
 			if token ~= 1 and vkid2 ~= nil then
@@ -2985,6 +3109,22 @@ function imgui.OnDrawFrame()
 						imgui.TextColoredRGB('• {paramNameByID} {21BDBF}- цифровой параметр, получаем имя по ID.')
 						imgui.TextColoredRGB('• {paramSurnameByID} {21BDBF}- цифровой параметр, получаем фамилию по ID.')
 
+						if imgui.CollapsingHeader(u8'Для двух параметров') then
+							imgui.TextColoredRGB('• {fff555}/'..v.cmd..' [параметр 1 | параметр 2] ("|" - обязательно)')
+							imgui.Separator()
+							imgui.TextColoredRGB('• {par1} {21BDBF}- первый параметр команды.')
+							imgui.TextColoredRGB('• {NickByIDpar1} {21BDBF}- первый цифровой параметр, получаем ник по ID.')
+							imgui.TextColoredRGB('• {FullNameByIDpar1} {21BDBF}- первый цифровой параметр, получаем РП ник по ID.')
+							imgui.TextColoredRGB('• {NameByIDpar1} {21BDBF}- первый цифровой параметр, получаем имя по ID.')
+							imgui.TextColoredRGB('• {SurnameByIDpar1} {21BDBF}- первый цифровой параметр, получаем фамилию по ID.')
+							imgui.Separator()
+							imgui.TextColoredRGB('• {par2} {21BDBF}- второй параметр команды.')
+							imgui.TextColoredRGB('• {NickByIDpar2} {21BDBF}- второй цифровой параметр, получаем ник по ID.')
+							imgui.TextColoredRGB('• {FullNameByIDpar2} {21BDBF}- второй цифровой параметр, получаем РП ник по ID.')
+							imgui.TextColoredRGB('• {NameByIDpar2} {21BDBF}- второй цифровой параметр, получаем имя по ID.')
+							imgui.TextColoredRGB('• {SurnameByIDpar2} {21BDBF}- второй цифровой параметр, получаем фамилию по ID.')
+						end
+
 						imgui.Separator()
 						imgui.TextColoredRGB('• {mynick} {21BDBF}- ваш полный ник - {fff555}'..tostring(userNick))
 						imgui.TextColoredRGB('• {myfname} {21BDBF}- ваш РП ник - {fff555}'..tostring(nickName))
@@ -2997,7 +3137,8 @@ function imgui.OnDrawFrame()
 						imgui.TextColoredRGB('• {arm} {21BDBF}- ваша армия - {fff555}'..tostring(fraction))
 						imgui.TextColoredRGB('• {org} {21BDBF}- ваша организация - {fff555}'..tostring(org))
 						imgui.TextColoredRGB('• {mtag} {21BDBF}- тэг организации - {fff555}'..tostring(mtag))
-						imgui.TextColoredRGB('• {rtag} {21BDBF}- ваш тэг - {fff555}'..tostring(u8:decode(rtag.v)))
+						imgui.TextColoredRGB('• {rtag} {21BDBF}- ваш тэг в /r - {fff555}'..tostring(u8:decode(rtag.v)))
+						imgui.TextColoredRGB('• {ftag} {21BDBF}- ваш тэг в /f - {fff555}'..tostring(u8:decode(ftag.v)))
 						imgui.TextColoredRGB('• {myrang} {21BDBF}- ваша должность - {fff555}'..tostring(rang))
 						imgui.TextColoredRGB('• {steam} {21BDBF}- ваш спец.отряд(должно быть включено в настройках) - {fff555}'..tostring(u8:decode(spOtr.v)))
 						imgui.Separator()
@@ -3027,7 +3168,7 @@ function imgui.OnDrawFrame()
 						imgui.TextColoredRGB('• {finfname} {21BDBF}- РП имя последнего в /f - {fff555}'..tostring(sampGetPlayerNickname(lastfradioID):gsub("_", " ")))
 						imgui.TextColoredRGB('• {fidname} {21BDBF}- имя последнего в /f - {fff555}'..tostring(sampGetPlayerNickname(lastfradioID):gsub("_.*", " ")))
 						imgui.TextColoredRGB('• {fidsurname} {21BDBF}- фамилия последнего в /f - {fff555}'..tostring(sampGetPlayerNickname(lastfradioID):gsub(".*_", " ")))
-						imgui.Text("------------------------------------------------------------------------------------------")
+						imgui.Separator()
 						imgui.TextColoredRGB('• {rid} {21BDBF}- последний ID из /r чата - {fff555}'..tostring(lastrradioID))
 						imgui.TextColoredRGB('• {ridrang} {21BDBF}- звание последнего в /r - {fff555}'..tostring(lastrradiozv))
 						imgui.TextColoredRGB('• {ridnick} {21BDBF}- ник последнего в /r - {fff555}'..tostring(sampGetPlayerNickname(lastrradioID)))
@@ -3068,6 +3209,92 @@ function imgui.OnDrawFrame()
 			imgui.NextColumn()
 			imgui.NewLine()
 			if imgui.Button(fa.ICON_WHEELCHAIR..u8(" Добавить бинд")) then mass_bind[#mass_bind + 1] = {delay = "3", v = {}, text = "n/a", cmd = "-"} end	
+		elseif showSet == 7 then			
+				imgui.SetCursorPosX(300)
+				imgui.Text(u8"Настройки для семьи (by DIPIRIDAMOLE).")
+				imgui.Separator()
+				imgui.AlignTextToFramePadding(); imgui.Text(fa.ICON_APPLE..u8(" Смена цвета ников в чате")); imgui.SameLine(); imgui.ToggleButton(u8("Смена цвета ников в чате"), ColorFama)
+				imgui.PushItemWidth(200)	
+				if imgui.ColorEdit3("", colorf) then
+					colornikifama = tostring(('%06X'):format((join_argb(0, colorf.v[1] * 255, colorf.v[2] * 255, colorf.v[3] * 255))))
+					R = colorf.v[1]
+					G = colorf.v[2]
+					B = colorf.v[3]
+				end
+				imgui.SameLine()
+				imgui.Text(u8"Нажмите на иконку и выберите цвет.")
+				imgui.Separator()
+				imgui.SetCursorPosX(260)
+				imgui.Text(u8"Введите ники, которые хотите выделять в чате.")
+				imgui.Separator()
+				imgui.Columns(2, _, false)
+				imgui.PushItemWidth(200)
+				imgui.InputText(fa.ICON_USER_CIRCLE..u8' Ник 1', nikifama1)
+				imgui.InputText(fa.ICON_USER_CIRCLE..u8' Ник 2', nikifama2)
+				imgui.InputText(fa.ICON_USER_CIRCLE..u8' Ник 3', nikifama3)
+				imgui.InputText(fa.ICON_USER_CIRCLE..u8' Ник 4', nikifama4)
+				imgui.InputText(fa.ICON_USER_CIRCLE..u8' Ник 5', nikifama5)
+				imgui.NextColumn()
+				imgui.PushItemWidth(200)
+				imgui.InputText(fa.ICON_USER_CIRCLE..u8' Ник 6', nikifama6)
+				imgui.InputText(fa.ICON_USER_CIRCLE..u8' Ник 7', nikifama7)
+				imgui.InputText(fa.ICON_USER_CIRCLE..u8' Ник 8', nikifama8)
+				imgui.InputText(fa.ICON_USER_CIRCLE..u8' Ник 9', nikifama9)
+				imgui.InputText(fa.ICON_USER_CIRCLE..u8' Ник 10', nikifama10)
+				
+				--[[for i, v in ipairs(mass_niki) do
+					--mass_niki[#mass_niki] = imgui.ImBuffer(256)				
+					imgui.PushItemWidth(400)
+					imgui.InputText(fa.ICON_USER_CIRCLE..u8' Ник '..i, mass_niki[i])
+					imgui.SameLine()
+					if imgui.Button(fa.ICON_SLIDESHARE..u8(" Удалить ник ##"..i)) then
+						table.remove(mass_niki, i)
+						saveSettings(3, "DROP NICK")
+					end
+
+				end
+				imgui.Columns(1, _, false)
+				if imgui.Button(fa.ICON_WHEELCHAIR..u8(" Добавить ник")) then 
+					mass_niki[#mass_niki + 1] = { '' } 
+				end]]
+		elseif showSet == 8 then
+			if imgui.Button(u8("Стандартная"), btn_size) then 
+				Theme = 1
+				apply_custom_style()
+			end
+			if imgui.Button(u8("Андровира"), btn_size) then 
+				Theme = 2
+				apply_custom_style()
+			end
+			if imgui.Button(u8("Черно-оранжевая"), btn_size) then 
+				Theme = 3
+				apply_custom_style()
+			end	
+			if imgui.Button(u8("Фиолетовая"), btn_size) then 
+				Theme = 4
+				apply_custom_style()
+			end	
+			if imgui.Button(u8("Серая"), btn_size) then 
+				Theme = 5
+				apply_custom_style()
+			end	
+			if imgui.Button(u8("Бело-голубая"), btn_size) then 
+				Theme = 6
+				apply_custom_style()
+			end
+			if imgui.Button(u8("Темно-серая"), btn_size) then 
+				Theme = 7
+				apply_custom_style()
+			end
+			if imgui.Button(u8("Темно-красная"), btn_size) then 
+				Theme = 8
+				apply_custom_style()
+			end
+			if imgui.Button(u8("Вишневая"), btn_size) then 
+				Theme = 9
+				apply_custom_style()
+			end
+
 		end
 
 		imgui.End()
@@ -3075,42 +3302,34 @@ function imgui.OnDrawFrame()
 
 	if win_state['leaders'].v then -- окно для лидеров
 		imgui.SetNextWindowPos(imgui.ImVec2(sw/2, sh/2), imgui.Cond.FirstUseEver, imgui.ImVec2(0.5, 0.5))
-		imgui.SetNextWindowSize(imgui.ImVec2(800, 450), imgui.Cond.FirstUseEver)
-		imgui.Begin(u8'Лидерам', win_state['leaders'], imgui.WindowFlags.MenuBar)
-		if imgui.BeginMenuBar() then
-			if imgui.MenuItem(fa.ICON_BARS..u8" Подача новостей") then
-				leadSet = 1
-			elseif imgui.MenuItem(fa.ICON_PAUSE..u8" Управление организацией") then
-				leadSet = 2
-			end
-			imgui.EndMenuBar()
-		end
+		imgui.SetNextWindowSize(imgui.ImVec2(900, 430), imgui.Cond.FirstUseEver)
+		imgui.Begin(u8'Лидерам', win_state['leaders'], imgui.WindowFlags.NoResize)
 
-		if leadSet == 1 then
 			imgui.Columns(2, _, false)
-			imgui.SetColumnWidth(-1, 500)
+			imgui.SetColumnWidth(-1, 640)
 			imgui.Text(u8'Общая госка:')
+			imgui.PushItemWidth(530)
 			imgui.InputText(u8'##gsk1', gos1)
 			imgui.InputText(u8'##gsk2', gos2)
 			imgui.InputText(u8'##gsk3', gos3)
 			imgui.SameLine()
 			if imgui.Button(u8'Отправить') then
 				if #gos1.v == 0 or #gos2.v == 0 or #gos3.v == 0 then
-					sampAddChatMessage("[MoD-Helper]{FFFFFF} Минимум одно поле пустое, заполните все поля.", 0x046D63)
+					sampAddChatMessage("[MoD-Helper]{FFFFFF} Минимум одно поле пустое, заполните все поля.", SCRIPTCOLOR)
 				else
 					if gosButton then
 						gosButton = false
 						lua_thread.create(function()
-							sampSendChat("/gnews "..u8:decode(gnewstag.v).." | "..u8:decode(gos1.v))
+							sampSendChat("/gnews "..u8:decode(gnewstag.v).." "..u8:decode(gos1.v))
 							wait(1000)
-							sampSendChat("/gnews "..u8:decode(gnewstag.v).." | "..u8:decode(gos2.v))
+							sampSendChat("/gnews "..u8:decode(gnewstag.v).." "..u8:decode(gos2.v))
 							wait(1000)
-							sampSendChat("/gnews "..u8:decode(gnewstag.v).." | "..u8:decode(gos3.v))
+							sampSendChat("/gnews "..u8:decode(gnewstag.v).." "..u8:decode(gos3.v))
 							wait(5000)
 							gosButton = true
 						end)
 					else
-						sampAddChatMessage("[MoD-Helper]{FFFFFF} Пожалуйста подождите окончания подачи гос.новости.", 0x046D63)
+						sampAddChatMessage("[MoD-Helper]{FFFFFF} Пожалуйста подождите окончания подачи гос.новости.", SCRIPTCOLOR)
 					end
 				end
 			end
@@ -3119,17 +3338,17 @@ function imgui.OnDrawFrame()
 			imgui.SameLine()
 			if imgui.Button(u8'Отпpавить') then
 				if #gos4.v == 00 then 
-					sampAddChatMessage("[MoD-Helper]{FFFFFF} Поле пустое, подача пустой строки невозможна.", 0x046D63)
+					sampAddChatMessage("[MoD-Helper]{FFFFFF} Поле пустое, подача пустой строки невозможна.", SCRIPTCOLOR)
 				else
 					if gosButton then
 						gosButton = false
 						lua_thread.create(function()
-							sampSendChat("/gnews "..u8:decode(gnewstag.v).." | "..u8:decode(gos4.v))
+							sampSendChat("/gnews "..u8:decode(gnewstag.v).." "..u8:decode(gos4.v))
 							wait(5000)
 							gosButton = true
 						end)
 					else
-						sampAddChatMessage("[MoD-Helper]{FFFFFF} Пожалуйста подождите окончания подачи гос.новости.", 0x046D63)
+						sampAddChatMessage("[MoD-Helper]{FFFFFF} Пожалуйста подождите окончания подачи гос.новости.", SCRIPTCOLOR)
 					end
 				end
 			end
@@ -3138,31 +3357,23 @@ function imgui.OnDrawFrame()
 			imgui.SameLine()
 			if imgui.Button(u8'Завершить') then
 				if #gos5.v == 0 then
-					sampAddChatMessage("[MoD-Helper]{FFFFFF} Поле пустое, подача пустой строки невозможна.", 0x046D63)
+					sampAddChatMessage("[MoD-Helper]{FFFFFF} Поле пустое, подача пустой строки невозможна.", SCRIPTCOLOR)
 				else
 					if gosButton then
 						gosButton = false
 						lua_thread.create(function()
-							sampSendChat("/gnews "..u8:decode(gnewstag.v).." | "..u8:decode(gos5.v))
+							sampSendChat("/gnews "..u8:decode(gnewstag.v).." "..u8:decode(gos5.v))
 							wait(5000)
 							gosButton = true
 						end)
 					else
-						sampAddChatMessage("[MoD-Helper]{FFFFFF} Пожалуйста подождите окончания подачи гос.новости.", 0x046D63)
+						sampAddChatMessage("[MoD-Helper]{FFFFFF} Пожалуйста подождите окончания подачи гос.новости.", SCRIPTCOLOR)
 					end
 				end
 			end
-			--imgui.NewLine()
-
 			imgui.TextColored(imgui.ImVec4(0.80, 0.73 , 0, 1.0), u8"Время по МСК: ")
 			imgui.SameLine()
 			imgui.Text(u8(string.format(os.date('%H:%M:%S', moscow_time))))
-			imgui.Text(u8'/gnews '..gnewstag.v..' | '..gos1.v)
-			imgui.Text(u8'/gnews '..gnewstag.v..' | '..gos2.v)
-			imgui.Text(u8'/gnews '..gnewstag.v..' | '..gos3.v)
-			imgui.NewLine()
-			imgui.Text(u8'/gnews '..gnewstag.v..' | '..gos4.v)
-			imgui.Text(u8'/gnews '..gnewstag.v..' | '..gos5.v)
 			imgui.NextColumn()
 			if imgui.CollapsingHeader(u8'Правительство') then
 				if imgui.Button(u8"АП") then
@@ -3313,7 +3524,7 @@ function imgui.OnDrawFrame()
 					gos5.v = u8("Собеседование в Телецентр штата окончено.")
 				end
 			end
-			imgui.NewLine()
+			--imgui.NewLine()
 			if imgui.Button(u8'Очистить строки') then
 				gos1.v = ''
 				gos2.v = ''
@@ -3321,15 +3532,25 @@ function imgui.OnDrawFrame()
 				gos4.v = ''
 				gos5.v = ''
 			end
-			imgui.NewLine()
-			imgui.PushItemWidth(100.0)
+			--imgui.NewLine()
+			imgui.PushItemWidth(60.0)
 			imgui.InputText(u8'Тэг /gnews', gnewstag)
 			imgui.PopItemWidth()
 			imgui.SameLine()
 			if imgui.Button(u8("Применить##228")) then saveSettings(4) end
-		elseif leadSet == 2 then
-			imgui.Text(u8("Данный раздел находится в разработке #2"))
-		end
+			--imgui.NewLine()
+
+		
+			imgui.Columns(1, _, false)
+			imgui.Separator()
+			imgui.Text(u8'/gnews '..gnewstag.v..' '..gos1.v)
+			imgui.Text(u8'/gnews '..gnewstag.v..' '..gos2.v)
+			imgui.Text(u8'/gnews '..gnewstag.v..' '..gos3.v)
+			imgui.NewLine()
+			imgui.Text(u8'/gnews '..gnewstag.v..' '..gos4.v)
+			imgui.Text(u8'/gnews '..gnewstag.v..' '..gos5.v)
+			
+		--end
 		imgui.End()
 	end
 
@@ -3382,6 +3603,8 @@ function imgui.OnDrawFrame()
 					imgui.TextColored(imgui.ImVec4(0.80, 0.73 , 0, 1.0), u8"/raport [ID] [Причина]")
 					imgui.TextColored(imgui.ImVec4(0.80, 0.73 , 0, 1.0), u8"/upd")
 					imgui.TextColored(imgui.ImVec4(0.80, 0.73 , 0, 1.0), u8"/tir [мс]")
+					imgui.TextColored(imgui.ImVec4(0.80, 0.73 , 0, 1.0), u8"/vig [id] [Причина]")
+					imgui.TextColored(imgui.ImVec4(0.80, 0.73 , 0, 1.0), u8"/nr [id] [Причина]")
 					imgui.TextColored(imgui.ImVec4(0.80, 0.73 , 0, 1.0), u8"/ffind")
 					imgui.TextColored(imgui.ImVec4(0.80, 0.73 , 0, 1.0), u8"ПКМ + 1")
 					imgui.TextColored(imgui.ImVec4(0.80, 0.73 , 0, 1.0), u8"ПКМ + R")
@@ -3389,7 +3612,7 @@ function imgui.OnDrawFrame()
 			imgui.NextColumn()
 				if isPlayerSoldier then
 					imgui.Text(u8"Полная проверка игрока на ЧС МО(по нику + история ников).")
-					imgui.Text(u8"Проверка игрока на ЧС МО по его никнейму через историю ников.")
+					imgui.Text(u8"Проверка игрока на ЧС МО по его никнейму через историю ников (Не работает на Red сервере).")
 					imgui.Text(u8"Обновление черного списка с форума.")
 				end
 				imgui.Text(u8"Отправка ООС сообщения в рацию подфракции.")
@@ -3411,6 +3634,8 @@ function imgui.OnDrawFrame()
 					imgui.Text(u8"Рапорт отстранения special for Red.")
 					imgui.Text(u8"Обновить данные в системе MoD-Helper(ник, фракция).")
 					imgui.Text(u8"Прокачивание скиллов. Задержка в милисекундах.")
+					imgui.Text(u8"Выдача выговора в /r. Доступна с 5 ранга.")
+					imgui.Text(u8"Выдача наряда в /r. Доступна с 5 ранга.")
 					imgui.Text(u8"Бесполезная секретная команда.")
 					imgui.Text(u8"Отдать честь игроку.")
 					imgui.Text(u8"Меню взаимодействия.")
@@ -3456,7 +3681,7 @@ function imgui.OnDrawFrame()
 
 	if win_state['about'].v then -- окно "о скрипте"
 		imgui.SetNextWindowPos(imgui.ImVec2(sw/2, sh/2), imgui.Cond.FirstUseEver, imgui.ImVec2(0.5, 0.5))
-		imgui.SetNextWindowSize(imgui.ImVec2(360, 225), imgui.Cond.FirstUseEver)
+		imgui.SetNextWindowSize(imgui.ImVec2(330, 270), imgui.Cond.FirstUseEver)
 		imgui.Begin(u8('О скрипте'), win_state['about'], imgui.WindowFlags.NoResize)
 
 		if developMode == 1 then imgui.Text(u8'MoD-Helper | Developer Mode')
@@ -3464,33 +3689,33 @@ function imgui.OnDrawFrame()
 		else imgui.Text(u8'MoD-Helper') end
 		imgui.Text(u8'Разработчик: Xavier Adamson')
 		imgui.Text(u8'Модератор: Arina Borisova')
-		imgui.Text(u8'Дополнял после слива исходника: Bruno Lottero')
+		imgui.Text(u8'Дополнял: DIPIRIDAMOLE')
 		imgui.Text(u8'Версия скрипта: '..thisScript().version)
 		imgui.Text(u8'Версия Moonloader: 026')
 		imgui.Text(u8'Спасибо blast.hk и нескольким людям за помощь')
 		imgui.Separator()
-		if imgui.Button(u8'VK') then
+		--[[if imgui.Button(u8'VK') then
 			print("Открываю: Настройки - О скрипте - ВК")
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Сейчас откроется ссылка на официальный паблик ВК.", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Сейчас откроется ссылка на официальный паблик ВК.", SCRIPTCOLOR)
 			print(shell32.ShellExecuteA(nil, 'open', 'https://vk.com/public168899283', nil, nil, 1))
 		end
 		imgui.SameLine()
 		if imgui.Button(u8'Поддержка') then
 			print("Открываю: Настройки - О скрипте - Поддержка")
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Сейчас откроется ссылка на официальную тему поддержки.", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Сейчас откроется ссылка на официальную тему поддержки.", SCRIPTCOLOR)
 			print(shell32.ShellExecuteA(nil, 'open', 'https://forum.advance-rp.ru/threads/ministerstvo-oborony-mod-helper-dlja-voennosluzhaschix.1649378/', nil, nil, 1))
 		end
-		imgui.SameLine()
-		if imgui.Button(u8'Обновиться до последней версии') then
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Начинаем проверку обновлений.", 0x046D63)
+		imgui.SameLine()]]
+		if imgui.Button(u8'Обновиться до последней версии', btn_size) then
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Начинаем проверку обновлений.", SCRIPTCOLOR)
 			checkupd = true
 			update()
 		end
 		if imgui.Button(u8'Отключить скрипт', btn_size) then 
 			offscript = offscript + 1
 			if offscript ~= 2 then
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы собираетесь отключить скрипт, обратная загрузка невозможна без сторонних скриптов или перезахода.", 0x046D63)
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Подтвердите отключение скрипта, если уверены в необходимости его отключения.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы собираетесь отключить скрипт, обратная загрузка невозможна без сторонних скриптов или перезахода.", SCRIPTCOLOR)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Подтвердите отключение скрипта, если уверены в необходимости его отключения.", SCRIPTCOLOR)
 			else
 				print("Отключаем скрипт из настроек")
 				reloadScript = true
@@ -3534,17 +3759,17 @@ function imgui.OnDrawFrame()
 		imgui.Separator()
 		imgui.TextWrapped(u8("Для установки обновления необходимо подтверждение пользователя, разработчик настоятельно рекомендует принимать обновления ввиду того, что прошлые версии через определенное время отключаются и более не работают."))
 		if imgui.Button(u8'Скачать и установить обновление', btn_size) then
-			async_http_request('GET', 'https://downloader.disk.yandex.ru/disk/e41b616a2a1974a2f181dccd78b9f22811f23acc62db2484ec896591473da4da/5eb209ff/6zKNNUjJXuwt1Hws_qPZn2q7KxsJrrj30l77JrMoHNh7KEgHz1m49mRZwoi5N8Z-NuTdqCNryGTcKaT6Ij2lrA%3D%3D?uid=0&filename=MO.lua&disposition=attachment&hash=zri33y6Pm2d65t7ucYAB%2BNPLRWs0q3P7phy7VRibbuGxmI5PpWsp2OdiLjPVkiOcq/J6bpmRyOJonT3VoXnDag%3D%3D%3A&limit=0&content_type=text%2Fplain&owner_uid=239171665&fsize=259916&hid=d22f4eade8f9b9d7aecc5ec0e34194d5&media_type=development&tknv=v2', nil, 
+			async_http_request('GET', 'https://raw.githubusercontent.com/DiPiDi/install/master/MO.luac', nil, 
 				function(response) -- вызовется при успешном выполнении и получении ответа
-				local f = assert(io.open(getWorkingDirectory() .. '/MO.lua', 'wb'))
+				local f = assert(io.open(getWorkingDirectory() .. '/MO.luac', 'wb'))
 				f:write(response.text)
 				f:close()
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Обновление успешно, перезагружаем скрипт.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Обновление успешно, перезагружаем скрипт.", SCRIPTCOLOR)
 				thisScript():reload()
 			end,
 			function(err) -- вызовется при ошибке, err - текст ошибки. эту функцию можно не указывать
 				print(err)
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Произошла ошибка при обновлении, попробуйте позже.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Произошла ошибка при обновлении, попробуйте позже.", SCRIPTCOLOR)
 				win_state['update'].v = not win_state['update'].v
 				return
 			end)
@@ -3553,117 +3778,7 @@ function imgui.OnDrawFrame()
 		imgui.End()
 	end
 
-	-- if win_state['regst'].v then -- окно регистрации игрока в базе скрипта
-	-- 	imgui.SetNextWindowPos(imgui.ImVec2(sw/2, sh/2), imgui.Cond.FirstUseEver, imgui.ImVec2(0.5, 0.5))
-	-- 	imgui.SetNextWindowSize(imgui.ImVec2(750, 410), imgui.Cond.FirstUseEver)
-    --     imgui.Begin(u8('Регистрация в системе MoD-Helper'), nil, imgui.WindowFlags.NoResize)
-	-- 	imgui.Text(u8'Приветствуем вас! Вероятней всего вы первый раз проходите процесс регистрации данных, ну начнем.')
-	-- 	imgui.Text(u8'Ваш никнейм: '..userNick..'('..playerAccoutNumber..')')
-	-- 	imgui.Text(u8'Сервер: '..u8(sampGetCurrentServerName())..' ('..srv..')')
-	-- 	imgui.Text(u8('Режим: '..(isPlayerSoldier and 'Военнослужащий' or 'Гражданский'..'.')))
-	-- 	if isPlayerSoldier then
-	-- 		imgui.Text(u8'Фракция: '..tostring(u8(org))..' | '..tostring(u8(preorg))..'('..tostring(u8(arm))..')')
-	-- 		imgui.Text(u8'Должность: '..tostring(u8(rang))..'('..tostring(u8(nasosal_rang))..')')
-	-- 	end
 
-	-- 	imgui.TextColored(imgui.ImVec4(0.60, 0.14 , 0.14, 1.0), u8"[ВАЖНЫЙ ПУНКТ] Прочтите информацию возле поля ввода тем как завершить регистрацию!")
-	-- 	imgui.InputInt(u8("Ваш ID ВК"), vkid, 0)
-	-- 	imgui.TextWrapped(u8("Указывать необходимо цифровой ID своего ВК, который можете узнать в настройках своего профиля, изменение в дальнейшем будет невозможно, если ID был ранее зарегистрирован - повторная регистрация невозможна. Скрипт будет работать только при условии, что вы подписаны на официальное сообщество разработки, что будет своего рода оплатой за работу, так как проект на данный момент позиционируется как бесплатный."))
-	-- 	if imgui.Button(u8'Открыть сообщество разработки', btn_size) then
-	-- 		sampAddChatMessage("[MoD-Helper]{FFFFFF} Сейчас откроется ссылка на официальный паблик ВК.", 0x046D63)
-	-- 		print(shell32.ShellExecuteA(nil, 'open', 'https://vk.com/public168899283', nil, nil, 1))
-	-- 	end
-	-- 	imgui.Separator()
-	-- 	imgui.TextColored(imgui.ImVec4(0.60, 0.14 , 0.14, 1.0), u8"Если данные не верны или получены не полностью - сообщите разработчику.")
-	-- 	imgui.TextColored(imgui.ImVec4(0.60, 0.14 , 0.14, 1.0), u8"Махинации с регистрацией наказываются полным лишением доступа пользователя к скрипту.")
-	-- 	imgui.Separator()
-	-- 	if imgui.Button(u8'Подтвердить данные и зарегистрироваться') then
-	-- 		local regstat = {}
-	-- 		local rabout = ""
-	-- 		regstat.data = "srv="..srv.."&num="..playerAccoutNumber.."&arm="..arm.."&n="..userNick.."&vkid="..vkid.v.."&sc="..LocalSerial.."&soldier="..tostring(isPlayerSoldier)
-	-- 		regstat.headers = {
-	-- 			['content-type']='application/x-www-form-urlencoded'
-	-- 		}
-			
-	-- 		async_http_request('POST', "https://frank09.000webhostapp.com/regst.php", regstat, 
-	-- 			function(response) -- вызовется при успешном выполнении и получении ответа
-	-- 				if u8:decode(response.text):find("Аккаунт зарегистрирован") then
-	-- 					local path = getWorkingDirectory() .. '\\MoD-Helper\\files\\regst.data'
-	-- 					local f = assert(io.open(path, 'wb'))
-	-- 					f:write(vkid.v)
-	-- 					f:close()
-
-	-- 					sampAddChatMessage("[MoD-Helper]{00C2BB} Вы успешно прошли регистрацию в системе MoD-Helper.", 0x046D63)
-	-- 					print("RegInfo: "..u8:decode(response.text))
-	-- 					regStatus = true
-	-- 					win_state['regst'].v = false
-	-- 					sampProcessChatInput("/reload")
-	-- 				elseif u8:decode(response.text):find("Данный аккаунт уже существует") or u8:decode(response.text):find("Не получены данные") then
-	-- 					sampAddChatMessage("[MoD-Helper]{FFFFFF} Произошла ошибка при регистрации, попробуйте позже.", 0x046D63)
-	-- 					print("RegInfo ErrTrue: "..u8:decode(response.text))
-	-- 					regStatus = true
-	-- 					win_state['regst'].v = not win_state['regst'].v
-	-- 				end
-	-- 		end,
-	-- 		function(err) -- вызовется при ошибке, err - текст ошибки. эту функцию можно не указывать
-	-- 			print(err)
-	-- 			sampAddChatMessage("[MoD-Helper]{FFFFFF} Произошла ошибка при регистрации, попробуйте позже.", 0x046D63)
-	-- 			win_state['regst'].v = not win_state['regst'].v
-	-- 			regStatus = true
-	-- 			return
-	-- 		end)
-
-	-- 	end
-	-- 	imgui.SameLine()
-	-- 	if imgui.Button(u8'Закрыть') then win_state['regst'].v = false thisScript():unload() end
-	-- 	imgui.End()
-	-- end
-
-	-- if win_state['renew'].v then -- окно обновления данных на сервере(делать необходимо в случае смены ника или же организации)
-	-- 	if not doesFileExist(getWorkingDirectory() .. '\\MoD-Helper\\files\\regst.data') then win_state['renew'].v = not win_state['renew'].v sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы не можете обновить данные так как вы не были зарегистрированы ранее.", 0x046D63) return false end
-	-- 	imgui.SetNextWindowPos(imgui.ImVec2(sw/2, sh/2), imgui.Cond.FirstUseEver, imgui.ImVec2(0.5, 0.5))
-	-- 	imgui.SetNextWindowSize(imgui.ImVec2(780, 275), imgui.Cond.FirstUseEver)
-    --     imgui.Begin(u8('Обновление данных в системе MoD-Helper'), nil, imgui.WindowFlags.NoResize)
-	-- 	imgui.TextWrapped(u8'Приветствуем вас! Если вы уже зарегистрированы, но вы перевелись, сменили ник или же вернулись после увольнения - необходимо обновить данные. На данный момент, ваши актуальные данные:')
-	-- 	imgui.Text(u8'Ваш никнейм: '..userNick..'('..playerAccoutNumber..')')
-	-- 	imgui.Text(u8'Сервер: '..u8(sampGetCurrentServerName())..' ('..srv..')')
-	-- 	imgui.Text(u8('Режим: '..(isLocalPlayerSoldier and 'Военнослужащий' or 'Гражданский'..'.')))
-	-- 	if isLocalPlayerSoldier then
-	-- 		imgui.Text(u8'Фракция: '..tostring(u8(org))..' | '..tostring(u8(preorg))..'('..tostring(u8(arm))..')')
-	-- 		imgui.Text(u8'Должность: '..tostring(u8(rang))..'('..tostring(u8(nasosal_rang))..')')
-	-- 	end
-	-- 	imgui.Separator()
-	-- 	imgui.TextColored(imgui.ImVec4(0.60, 0.14 , 0.14, 1.0), u8"Если данные не верны или получены не полностью - сообщите разработчику.")
-	-- 	imgui.TextColored(imgui.ImVec4(0.60, 0.14 , 0.14, 1.0), u8"Махинации с обновлением данных караются полным лишением доступа пользователя к скрипту.")
-	-- 	imgui.TextColored(imgui.ImVec4(0.60, 0.14 , 0.14, 1.0), u8"После обновления в базе сменится никнейм и организация.")
-	-- 	imgui.Separator()
-	-- 	if imgui.Button(u8'Подтвердить и обновить данные') then
-	-- 		local accupd = {}
-	-- 		accupd.data = "srv="..srv.."&num="..playerAccoutNumber.."&arm="..arm.."&n="..userNick.."&sc="..LocalSerial.."&soldier="..tostring(isLocalPlayerSoldier)
-	-- 		accupd.headers = {
-	-- 			['content-type']='application/x-www-form-urlencoded'
-	-- 		}
-			
-	-- 		async_http_request('POST', "https://frank09.000webhostapp.com/st.php", accupd, 
-	-- 			function(response) -- вызовется при успешном выполнении и получении ответа
-	-- 				sampAddChatMessage("[MoD-Helper]{00C2BB} Вы успешно обновили свои данные в системе MoD-Helper.", 0x046D63)
-	-- 				print("UpdInfo: "..u8:decode(response.text))
-	-- 				win_state['renew'].v = false
-	-- 				sampProcessChatInput("/reload")
-	-- 		end,
-	-- 		function(err) -- вызовется при ошибке, err - текст ошибки. эту функцию можно не указывать
-	-- 			print(err)
-	-- 			sampAddChatMessage("[MoD-Helper]{FFFFFF} Произошла ошибка при обновлении данных, попробуйте позже.", 0x046D63)
-	-- 			win_state['renew'].v = false
-	-- 			return
-	-- 		end)
-
-	-- 	end
-	-- 	imgui.SameLine()
-	-- 	if imgui.Button(u8'Закрыть') then win_state['renew'].v = false end
-	-- 	imgui.End()
-	-- end
-	
 	if win_state['informer'].v then -- окно информера
 
 		imgui.SetNextWindowPos(imgui.ImVec2(infoX, infoY), imgui.ImVec2(0.5, 0.5))
@@ -3953,11 +4068,36 @@ function rcmd(cmd, text, delay) -- функция для биндера, без которой не будет ни 
 			globalcmd = lua_thread.create(function() -- поток гасим в переменную, чтобы потом я мог стопить бинды, но что-то пошло не так и они обратно не запускались ;D
 				if not keystatus then -- проверяем, не активен ли сейчас иной бинд
 					cmdparams = params -- задаем параметры тэгам
-					if text:find("{param") and cmdparams == '' then -- если в тексте бинда есть намек на тэг параметра и параметр пуст, говорим заполнить его
+					if text:find("{par1") or text:find("{par2") or text:find("IDpar1}") or text:find("IDpar2}") then
+						cmdparams1 = cmdparams:match("(.+) | .+")
+						cmdparams2 = cmdparams:match(".+ | (.+)")
+					end  -- (text:find("{par") or text:find("IDpar")) and (cmdparams == '' or cmdparams1 == nil or cmdparams2 == nil)
+					
+					
+					if (((text:find("{par1}") or text:find("{par2}") or text:find("IDpar")) and (cmdparams1 == nil or cmdparams2 == nil)) or ((text:find("{params}") or text:find("ByID}")) and cmdparams == '')) then -- если в тексте бинда есть намек на тэг параметра и параметр пуст, говорим заполнить его
 						--sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /"..cmd.." ["..(text:find("byID}") and 'ID' or 'Параметр').."].", 0x046D63)
 						local partype = '' -- объявим локальную переменную
-						if text:find("ByID}") then partype = "ID" else partype = "Параметр" end -- зададим ей значение из условия
-						sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /"..cmd.." ["..partype.."].", 0x046D63)
+						if text:find("ByID}") then 
+							partype = "ID"
+							sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: {"..u8:decode(Secondcolor.v).."}/"..cmd.." ["..partype.."].", SCRIPTCOLOR)
+						elseif text:find("{par1}") and text:find("{par2}") then 
+							partype = "Параметр 1 | Параметр 2"
+							sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: {"..u8:decode(Secondcolor.v).."}/"..cmd.." ["..partype.."].", SCRIPTCOLOR)
+						elseif text:find("IDpar1}") and text:find("{par2") then
+							partype = "ID | Параметр 2"
+							sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: {"..u8:decode(Secondcolor.v).."}/"..cmd.." ["..partype.."].", SCRIPTCOLOR)
+						elseif text:find("IDpar2}") and text:find("{par1") then 
+							partype = "Параметр 1 | ID"
+							sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: {"..u8:decode(Secondcolor.v).."}/"..cmd.." ["..partype.."].", SCRIPTCOLOR)
+						elseif text:find("IDpar1}") and text:find("IDpar2}") then 
+							partype = "ID | ID"
+							sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: {"..u8:decode(Secondcolor.v).."}/"..cmd.." ["..partype.."].", SCRIPTCOLOR)
+						elseif text:find("{params}") then
+							partype = "Параметр"
+							sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: {"..u8:decode(Secondcolor.v).."}/"..cmd.." ["..partype.."].", SCRIPTCOLOR)
+						else
+							sampAddChatMessage("[MoD-Helper]{FFFFFF} В тексте бинда нехватает параметров либо есть лишние.", SCRIPTCOLOR)
+						end -- зададим ей значение из условия
 					else
 						keystatus = true
 						local strings = split(text, '~', false) -- обрабатываем текст бинда
@@ -3967,6 +4107,8 @@ function rcmd(cmd, text, delay) -- функция для биндера, без которой не будет ни 
 						end
 						keystatus = false
 						cmdparams = nil -- обнуляем параметры после использования
+						cmdparams1 = nil
+						cmdparams2 = nil
 					end
 				end
 			end)
@@ -3974,8 +4116,8 @@ function rcmd(cmd, text, delay) -- функция для биндера, без которой не будет ни 
 	else
 		-- тут все аналогично, как и с командами, только чуток проще.
 		globalkey = lua_thread.create(function()
-			if text:find("{params}") then
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} В данном бинде установлен параметр, использование клавишами невозможно.", 0x046D63)
+			if text:find("{par") or text:find("par1}") or text:find("par2}") then
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} В данном бинде имеется один или более параметров, использование клавишами невозможно.", SCRIPTCOLOR)
 			else
 
 				local strings = split(text, '~', false)
@@ -4026,10 +4168,10 @@ function ClearBlip() -- удаление маркера/таргета
 		if marker.v then
 			removeBlip(newmark)	
 			print("Снимаем таргет маркер с игрока "..sampGetPlayerNickname(blipID))
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Маркер с игрока "..sampGetPlayerNickname(blipID).." был успешно удален.", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Маркер с игрока "..sampGetPlayerNickname(blipID).." был успешно удален.", SCRIPTCOLOR)
 		else
 			print("Снимаем таргет с игрока "..sampGetPlayerNickname(blipID))
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Таргет с игрока "..sampGetPlayerNickname(blipID).." был успешно снят.", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Таргет с игрока "..sampGetPlayerNickname(blipID).." был успешно снят.", SCRIPTCOLOR)
 		end
 		blipID = nil
 		newmark = nil
@@ -4089,7 +4231,7 @@ end
 function ARGBtoRGB(color) return bit32 or require'bit'.band(color, 0xFFFFFF) end -- конверт цветов
 
 function rel() -- перезагрузка скрипта
-	sampAddChatMessage("[MoD-Helper]{FFFFFF} Скрипт перезагружается.", 0x046D63)
+	sampAddChatMessage("[MoD-Helper]{FFFFFF} Скрипт перезагружается.", SCRIPTCOLOR)
 	reloadScript = true
 	thisScript():reload()
 end
@@ -4101,138 +4243,6 @@ function clearSeleListBool(var) -- не ебу что-это ахахах ;D
 	SeleListBool[var].v = true
 end
 
--- function registration() -- проверяем наличие регистрации игрока в базе скрипта, получаем информацию из базы.
--- 	print("Проверяем регистрацию игрока..")
--- 	local path = getWorkingDirectory() .. '\\MoD-Helper\\files\\regst.data'
--- 	if not doesFileExist(path) then
--- 		print("Локальный файл подтверждения не найден, открываем регистрацию.")
--- 		win_state['regst'].v = not win_state['regst'].v
--- 		regStatus = true
--- 		gmsg = true
--- 	else
--- 		print("Регистрация ранее была пройдена, получаем данные.")
--- 		local getstat = {}
--- 		getstat.data = "srv="..srv.."&num="..playerAccoutNumber
--- 		getstat.headers = {
--- 			['content-type']='application/x-www-form-urlencoded'
--- 		}
--- 		async_http_request('POST', 'https://frank09.000webhostapp.com/gfile.php', getstat, -- получение данных статистики с сервера
--- 		function(response) -- вызовется при успешном выполнении и получении ответа
--- 			if not response.text:find("Не получены данные.") then
--- 				if not response.text:find("Такого аккаунта нет") then
--- 					if not response.text:find("| %d+ | %d+ | %d+ | %d+ | %d+ | %d+ | %d+ | .* | %d+ | %d+ | %d+ | %d+ | .*") then
--- 						print("GetInfo error #1: "..u8:decode(response.text))
--- 						sampAddChatMessage("[MoD-Helper]{FFFFFF} Не удалось получить статистику игрока с базы данных. Свяжитесь с разработчиком.", 0x046D63)
--- 						sampAddChatMessage("[MoD-Helper]{FFFFFF} Скрипт активен в ограниченном режиме, активация {00C2BB}/mod{FFFFFF}. Разработчик: {00C2BB}Xavier Adamson.", 0x046D63)
--- 						sampAddChatMessage("[MoD-Helper]{FFFFFF} Технический модератор и просто хороший человек - {00C2BB}Arina Borisova.", 0x046D63)
--- 						if userNick == "Xavier_Adamson" then
--- 							sampAddChatMessage("[MoD-Admin]{00C2BB} Доступ разработчика подтвержден, функционал расширен.", 0x046D63)
--- 							developMode = 1
--- 							nasosal_rang = 10
--- 						end
--- 						pentcout, pentsrv, pentinv, pentuv = 0
--- 						activated = false
--- 						accessD = u8("Нет допуска")
--- 						gmsg = true
--- 					else				
--- 						superID, getarm, vigcout, narcout, dostupLvl, rAbout, whitelist, developMode, order, vkid2, soldier = response.text:match("| (%d+) | %d+ | %d+ | (%d+) | (%d+) | (%d+) | (%d+) | (.*) | (%d+) | (%d+) | (%d+) | (%d+) | (.*)")
--- 						local vkc = io.open(path, 'r')
--- 						vkinf = vkc:read('*a')
--- 						vkc:close()	
-						
--- 						print("GetStat result - ID: "..tostring(superID)..", mode: "..developMode..", SVKID:"..tostring(vkid2))
--- 						print("Local VKID: "..vkinf..", server VKID: "..tostring(vkid2))
-
--- 						if vkid2 == vkinf then
--- 							print("GetStat: VKinf == VKID")
--- 							vigcout = tonumber(vigcout) -- получение выговоров
--- 							narcout = tonumber(narcout) -- получение нарядов
--- 							order = tonumber(order) -- получение наград
--- 							dostupLvl = tonumber(dostupLvl) -- получение уровня доступа
--- 							whitelist = tonumber(whitelist) -- получение уровня доступа
--- 							developMode = tonumber(developMode) -- получение уровня доступа
-
--- 							if developMode == 4 then 
--- 								sampAddChatMessage("[MoD-Helper]{FFFFFF} Работа скрипта была приостановлена для вашего аккаунта.", 0x046D63)
--- 								sampAddChatMessage("[MoD-Helper]{FFFFFF} Более подробней можете уточнить в группе разработки.", 0x046D63)
--- 								reloadScript = true
--- 								thisScript():unload()
--- 								return
--- 							end
--- 							sampAddChatMessage("[MoD-Helper]{FFFFFF} Ваш ID в базе: {00C2BB}"..tonumber(superID).."{FFFFFF}, активация {00C2BB}/mod{FFFFFF}, разработчик: {00C2BB}Xavier Adamson.", 0x046D63)
--- 							sampAddChatMessage("[MoD-Helper]{FFFFFF} Технический модератор и просто хороший человек - {00C2BB}Arina Borisova.", 0x046D63)
--- 							if dostupLvl == 0 then accessD = u8("1 уровень допуска")
--- 							elseif dostupLvl == 1 then accessD = u8("2 уровень допуска")
--- 							elseif dostupLvl == 2 then accessD = u8("3 уровень допуска")
--- 							elseif dostupLvl == 3 then accessD = u8("Alfa допуск")
--- 							else accessD = u8("Нет допуска") end
--- 							activated = true
--- 							if soldier:find("true") then
--- 								sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы определены как {00C2BB}военный{FFFFFF}, функционал откорректирован.", 0x046D63)
--- 								isPlayerSoldier = true
--- 							else
--- 								sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы определены как {00C2BB}гражданский{FFFFFF}, функционал откорректирован.", 0x046D63)
--- 								isPlayerSoldier = false
--- 							end
--- 							if developMode == 1 then
--- 								sampAddChatMessage("[MoD-Admin]{00C2BB} Доступ разработчика подтвержден, функционал расширен.", 0x046D63)
--- 								nasosal_rang = 10
--- 							elseif developMode == 2 then
--- 								sampAddChatMessage("[MoD-Helper]{00C2BB} Технические изменения от разработчика подтверждены, функционал откорректирован.", 0x046D63)
--- 							end
--- 							while token == 0 do wait(0) end
--- 							if vkinf ~= nil then checkVK(vkinf) else print("VK check error") end
--- 							gmsg = true
--- 						else
--- 							print("GetStat: VKinf ~= VKID")
--- 							sampAddChatMessage("[MoD-Helper]{FFFFFF} Произошла ошибка, локальный и серверный ID ВКонтакте по вашим данным не совпадают.", 0x046D63)
--- 							sampAddChatMessage("[MoD-Helper]{FFFFFF} Работа скрипта невозможна, если вы не подписаны на группу разработки или же указали неверный VK ID.", 0x046D63)
--- 							reloadScript = true
--- 							thisScript():unload()
--- 						end
--- 					end
--- 				else
--- 					sampAddChatMessage("[MoD-Helper]{FFFFFF} Произошла ошибка, данный аккаунт не зарегистрирован в базе данных MoD-Helper.", 0x046D63)
--- 					sampAddChatMessage("[MoD-Helper]{FFFFFF} Работа скрипта остановлена, свяжитесь с разработчиком для устранения проблемы.", 0x046D63)
--- 					reloadScript = true
--- 					thisScript():unload()
--- 				end
--- 			else
--- 				sampAddChatMessage("[MoD-Helper]{FFFFFF} Не удалось получить статистику игрока с базы данных. Свяжитесь с разработчиком.", 0x046D63)
--- 				sampAddChatMessage("[MoD-Helper]{FFFFFF} Скрипт активен в ограниченном режиме, активация {00C2BB}/mod{FFFFFF}. Разработчик: {00C2BB}Xavier Adamson.", 0x046D63)
--- 				sampAddChatMessage("[MoD-Helper]{FFFFFF} Технический модератор и просто хороший человек - {00C2BB}Arina Borisova.", 0x046D63)
--- 				if userNick == "Xavier_Adamson" then
--- 					sampAddChatMessage("[MoD-Admin]{00C2BB} Доступ разработчика подтвержден, функционал расширен.", 0x046D63)
--- 					developMode = 1
--- 					nasosal_rang = 10
--- 				end
-				
--- 				print("GetStat error #1: "..u8:decode(response.text))
--- 				pentcout, pentsrv, pentinv, pentuv = 0
--- 				activated = false
--- 				accessD = u8("Нет допуска")
--- 				gmsg = true
--- 			end
--- 		end,
--- 		function(err) -- вызовется при ошибке, err - текст ошибки. эту функцию можно не указывать
--- 			print(err)
--- 			sampAddChatMessage("[MoD-Helper]{FFFFFF} База данных времененно недоступна, попробуйте повторить операцию позже.", 0x046D63)
--- 			sampAddChatMessage("[MoD-Helper]{FFFFFF} Свяжитесь с технической поддержкой или попробуйте повторить позднее.", 0x046D63)
--- 			sampAddChatMessage("[MoD-Helper]{FFFFFF} Скрипт активен в ограниченном режиме, активация {00C2BB}/mod{FFFFFF}. Разработчик: {00C2BB}Xavier Adamson.", 0x046D63)
--- 			sampAddChatMessage("[MoD-Helper]{FFFFFF} Технический модератор и просто хороший человек - {00C2BB}Arina Borisova.", 0x046D63)
--- 			if userNick == "Xavier_Adamson" then
--- 				sampAddChatMessage("[MoD-Admin]{00C2BB} Доступ разработчика подтвержден, функционал расширен.", 0x046D63)
--- 				developMode = 1
--- 				nasosal_rang = 10
--- 			end
--- 			pentcout, pentsrv, pentinv, pentuv = 0
--- 			activated = false
--- 			accessD = u8("Нет допуска")
--- 			gmsg = true
--- 		end)
--- 		regStatus = true
--- 	end
--- end
 
 function update() -- проверка обновлений
 	local zapros = https.request("https://raw.githubusercontent.com/DiPiDi/install/master/update.json")
@@ -4249,30 +4259,30 @@ function update() -- проверка обновлений
 			
 			if tonumber(thisScript().version_num) <= dropver then
 				print("[Update] Used non supported version: "..thisScript().version_num..", actual: "..version)
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Ваша версия более не поддерживается разработчиком, работа скрипта невозможна.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Ваша версия более не поддерживается разработчиком, работа скрипта невозможна.", SCRIPTCOLOR)
 				reloadScript = true
 				thisScript():unload()
 			elseif version > tonumber(thisScript().version_num) then
 				print("[Update] Обнаружено обновление")
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Обнаружено обновление до версии "..updatever..".", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Обнаружено обновление до версии {"..u8:decode(Secondcolor.v).."}"..updatever..".", SCRIPTCOLOR)
 				win_state['update'].v = true
 				UpdateNahuy = true
 			else
 				print("[Update] Новых обновлений нет, контроль версий пройден")
 				if checkupd then
-					sampAddChatMessage("[MoD-Helper]{FFFFFF} У вас стоит актуальная версия скрипта: "..thisScript().version..".", 0x046D63)
-					sampAddChatMessage("[MoD-Helper]{FFFFFF} Необходимости обновлять скрипт - нет, приятного пользования.", 0x046D63)
+					sampAddChatMessage("[MoD-Helper]{FFFFFF} У вас стоит актуальная версия скрипта: {"..u8:decode(Secondcolor.v).."}"..thisScript().version..".", SCRIPTCOLOR)
+					sampAddChatMessage("[MoD-Helper]{FFFFFF} Необходимости обновлять скрипт - нет, приятного пользования.", SCRIPTCOLOR)
 					checkupd = false
 				end
 				UpdateNahuy = true
 			end
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Ошибка при получении информации об обновлении.", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Ошибка при получении информации об обновлении.", SCRIPTCOLOR)
 			print("[Update] JSON file read error")
 			UpdateNahuy = true
 		end
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Не удалось проверить наличие обновлений, попробуйте позже.", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Не удалось проверить наличие обновлений, попробуйте позже.", SCRIPTCOLOR)
 		UpdateNahuy = true
 	end
 end
@@ -4312,44 +4322,6 @@ function async_http_request(method, url, args, resolve, reject) -- асинхронные з
         end
     end)
 end
--- function async_http_request(method, url, args, resolve, reject) -- effil
--- 	local request_thread = effil.thread(function (method, url, args)
--- 	   local requests = require 'requests'
--- 	   local result, response = pcall(requests.request, method, url, args)
--- 	   if result then
--- 		  response.json, response.xml = nil, nil
--- 		  return true, response
--- 	   else
--- 		  return false, response
--- 	   end
--- 	end)(method, url, args)
--- 	-- Если запрос без функций обработки ответа и ошибок.
--- 	if not resolve then resolve = function() end end
--- 	if not reject then reject = function() end end
--- 	-- Проверка выполнения потока
--- 	lua_thread.create(function()
--- 	   local runner = request_thread
--- 	   while true do
--- 		  local status, err = runner:status()
--- 		  if not err then
--- 			 if status == 'completed' then
--- 				local result, response = runner:get()
--- 				if result then
--- 				   resolve(response)
--- 				else
--- 				   reject(response)
--- 				end
--- 				return
--- 			 elseif status == 'canceled' then
--- 				return reject(status)
--- 			 end
--- 		  else
--- 			 return reject(err)
--- 		  end
--- 		  wait(0)
--- 	   end
--- 	end)
---  end
 
 function black_checker(params) -- чекер ЧСа по ID
 	if params:match("^%d+") then
@@ -4357,8 +4329,8 @@ function black_checker(params) -- чекер ЧСа по ID
 		blackid = tonumber(blackid)
 		if sampIsPlayerConnected(blackid) or blackid == myID then
 			local blacknick = sampGetPlayerNickname(blackid)
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Если никаких уведомлений после этого сообщения нет - игрока нет в ЧС.", 0x046D63)
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Проверяем игрока "..blacknick.." на наличие в черном списке Мин.Обороны.", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Если никаких уведомлений после этого сообщения нет - игрока нет в ЧС.", SCRIPTCOLOR)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Проверяем игрока "..blacknick.." на наличие в черном списке Мин.Обороны.", SCRIPTCOLOR)
 			
 			if rpblack.v then
 				lua_thread.create(function() 
@@ -4392,10 +4364,10 @@ function black_checker(params) -- чекер ЧСа по ID
 			end
 			black_history(blacknick) -- чек по истории сразу
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", SCRIPTCOLOR)
 		end
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /black [ID].", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /black [ID].", SCRIPTCOLOR)
 		return
 	end
 end
@@ -4415,12 +4387,12 @@ function black_history(params) -- чекер ЧСа по нику
 			end
 		end
 		if not pidr then
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Проверяем историю ников "..params..".", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Проверяем историю ников "..params..".", SCRIPTCOLOR)
 			checking = true
 			sampSendChat("/history "..blackn.."")
 		end
 	else 
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /bhist [nick].", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /bhist [nick].", SCRIPTCOLOR)
 		return
 	end
 end
@@ -4436,7 +4408,7 @@ function changeSkin(id, skinId) -- визуальная смена скина(imring вроде бы скидыв
 end
 
 function upd_blacklist() -- обновить список ЧСников
-	sampAddChatMessage("[MoD-Helper]{FFFFFF} Начинаем обновление списка ЧС.", 0x046D63)
+	sampAddChatMessage("[MoD-Helper]{FFFFFF} Начинаем обновление списка ЧС.", SCRIPTCOLOR)
 	local path = getGameDirectory() .. '\\moonloader\\MoD-Helper\\blacklist.txt'
 	downloadUrlToFile(blackcheckerpath.v, path, function(id, status, p1, p2)
 		if status == dlstatus.STATUS_ENDDOWNLOADDATA then
@@ -4463,7 +4435,7 @@ function upd_blacklist() -- обновить список ЧСников
 					printStringNow("~r~STATUS: ~g~UPDATE COMPLETED", 3000)
 				else 
 					print('[Blacklist]: Preparing error, please, /try again later.')
-					sampAddChatMessage("[MoD-Helper]{FFFFFF} Произошла ошибка при обновлении списка ЧС.", 0x046D63)
+					sampAddChatMessage("[MoD-Helper]{FFFFFF} Произошла ошибка при обновлении списка ЧС.", SCRIPTCOLOR)
 				end
 			end)
 		end
@@ -4492,7 +4464,7 @@ end
 function sampev.onServerMessage(color, text)
 
 	WriteLog(os.date('[%H:%M:%S | %d.%m.%Y]')..' '..text:gsub("{.-}", ""),  'MoD-Helper', 'chatlog') -- запись всех сообщений в лог, тут я подрезал функцию у Вани Мытарева хД
-	
+
 	if ads.v then -- отключаем объявки и переносим их в консольку
 		if color == 13369599 and text:find("Отправил") then print("{14ccbd}[ADS]{279c40}".. text) return false end
 		if color == 10027263 and text:find("сотрудник") then print("{14ccbd}[ADS]{0f6922}"..text) return false end
@@ -4505,27 +4477,12 @@ function sampev.onServerMessage(color, text)
 		offMask = false
 	end
 
-	-- if nickdetect.v and workpause and text:find(userNick) then -- детект ника и отправка сообщения в ВК при включенном VK-Int.
-	-- 	vkmessage(tonumber(vkid2), "Ваш ник обнаружен в сообщении:%0A"..text:gsub("{.-}", "")) -- %0A - это перенос на новую строку, именно так его понимает ВК.
-	-- end
-
-	-- if familychat.v and workpause and text:match("%[G%] .*") then -- получение сообщений из /g чата при включенном VK-Int.
-	-- 	vkmessage(tonumber(vkid2), text)
-	-- end
 
 	if color == 1721355519 and text:match("%[F%] .*") then -- получение ранга и ID игрока, который последним написал в /f чат, для тэгов биндера
 		lastfradiozv, lastfradioID = text:match('%[F%]%s(.+)%s%a+_%a+%[(%d+)%]: .+')
 	elseif color == 869033727 and text:match("%[R%] .*") then -- получение ранга и ID игрока, который последним написал в /r чат, для тэгов биндера
 		lastrradiozv, lastrradioID = text:match('%[R%]%s(.+)%s%a+_%a+%[(%d+)%]: .+')
 	end
-
-	-- if getradio.v and workpause then -- получение /r, /f чатов при включенном VK-Int
-	-- 	if color == 1721355519 and text:find("[F]") then
-	-- 		vkmessage(tonumber(vkid2), text)
-	-- 	elseif color == 869033727 and text:find("[R]") then
-	-- 		vkmessage(tonumber(vkid2), text)
-	-- 	end
-	-- end
 
 	if color == -577699841 and text:find("взял%(а%)") then -- автоматическая хавка в военной столовке
 		if text:find("паёк") or text:find("добавкой") or text:find("десерт") then
@@ -4536,18 +4493,6 @@ function sampev.onServerMessage(color, text)
 		end
 		return {color, text}
 	end
-
-	--if Zdravia.v then -- автоматический ответ в /r на здравия желаю
-	--	if text:find("Здравия желаю") or text:find("здравия желаю") or text:find("Здравие желаю") or text:find("здравие желаю") or text:find("Здравие Желаю") or text:find("Здравия Желаю") or text:find("Здравия") or text:find("Здравие") or text:find("Здравие") or text:find("здравие") then
-	--		if text:find("[R]") and not text:find("товарищ") and color == 869033727 then
-	--			lua_thread.create(function()
-	--				wait(100)
-	--				sampSendChat(string.format("/r [%s]: Здравия желаю, товарищ"..tostring(sampGetPlayerNickname(lastrradioID):gsub(".*_", " ")).."!", u8:decode(rtag.v)))
-	--			end)
-	--		end
-	--	end
-	--end
-
 
 	if text:match("SMS: .* | Отправитель: .* %[т%.%d+%]") then -- сохраняем входящий номер + отыгровки мобилки + звук
 		local tsms, tname, SMS = text:match("SMS: (.*) | Отправитель: (.*) %[т%.(%d+)%]") 
@@ -4592,161 +4537,65 @@ function sampev.onServerMessage(color, text)
 		end
 	end
 
-
 	-----------------------------------------------------------------------------
 	----------------- ПОКРАСКА НИКОВ И ВСЕ ЧТО С ЭТИМ СВЯЗАНО -------------------
 	-----------------------------------------------------------------------------
-	
-	
-	if text:find('%[.+%]%s.+%s%a+_%a+%[.+%]: .+') then -- покраска ников в /r, /f чатах
-		local developers = { ['Xavier_Adamson'] = true, ['Arina_Borisova'] = true, ['Milana_Fiorentino'] = true, ['Vasiliy_Rostov'] = true }
-		local chats = { ['[F]'] = true, ['[R]'] = true, ['[T]'] = true }
-		local zvans = { ['Генерал'] = true, ['Адмирал'] = true, ['Полковник'] = true, ['Подполковник'] = true, ['Капитан 1 ранга'] = true, ['Капитан 2 ранга'] = true }
 
-		local chat, zvan, nick, id, text2 = text:match('(%[.+%])%s(.+)%s(%a+_%a+)%[(%d+)%]: (.+)')
-
-		if chats[chat] and not developers[nick] and getServerColored:find(nick) then
-			return { color, chat..' '..zvan..' {d1ae1f}'..nick..'['..id..']: {'..string.format('%X', bit.rshift(color, 8))..'}'..text2 }
-		elseif chats[chat] and developers[nick] then
-			return { color, chat..' '..zvan..' {d11f1f}'..nick..'['..id..']: {'..string.format('%X', bit.rshift(color, 8))..'}'..text2 }
-		end
-	end
-
-	
-	if #colornikifama.v == 6 and tostring(colornikifama.v):match("%x+") then
-		if ColorFama.v and text:find('%[.+%]%s%a+_'..u8:decode(nikifama.v)..': .+') then -- покраска ников фамы в /g чате
-			local chats = { ['[G]'] = true }
-			local chat, nick, text2 = text:match('(%[.+%])%s(%a+_%a+)%: (.+)')
-			if chats[chat] then
-				return { color, chat..' {'..u8:decode(colornikifama.v)..'}'..nick..': {'..string.format('%X', bit.rshift(color, 8))..'}'..text2 }
+	if ColorFama.v then
+		local masss = {}
+		table.insert(masss, 1, nikifama1.v)
+		table.insert(masss, 2, nikifama2.v)
+		table.insert(masss, 3, nikifama3.v)
+		table.insert(masss, 4, nikifama4.v)
+		table.insert(masss, 5, nikifama5.v)
+		table.insert(masss, 6, nikifama6.v)
+		table.insert(masss, 7, nikifama7.v)
+		table.insert(masss, 8, nikifama8.v)
+		table.insert(masss, 9, nikifama9.v)
+		table.insert(masss, 10, nikifama10.v)
+		for i = 1, 10 do
+			if text:find('%('..u8:decode(masss[i])..'%)%[.+%]') then
+				local idc = text:match('%[(%d+)%]')
+				if tostring(u8:decode(masss[i])):match('%a') then	
+					text = text:gsub('%('..u8:decode(masss[i])..'%)%['..idc..'%]', '{'..colornikifama..'}('..u8:decode(masss[i])..')['..idc..']{'..string.format('%X', bit.rshift(color, 8))..'}')
+				end
+			elseif text:find(''..u8:decode(masss[i])..'%[.+%]:') then
+				local idc = text:match('%[(%d+)%]')
+				if tostring(u8:decode(masss[i])):match('%a') then	
+					text = text:gsub(u8:decode(masss[i])..'%['..idc..'%]:', '{'..colornikifama..'}'..u8:decode(masss[i])..'['..idc..']:{'..string.format('%X', bit.rshift(color, 8))..'}')
+				end
+			elseif text:find(''..u8:decode(masss[i])..'%[.+%]') and not text:find('| Отправил') then
+				local idc = text:match('%[(%d+)%]')
+				if tostring(u8:decode(masss[i])):match('%a') then	
+					text = text:gsub(u8:decode(masss[i])..'%['..idc..'%]', '{'..colornikifama..'}'..u8:decode(masss[i])..'['..idc..']{'..string.format('%X', bit.rshift(color, 8))..'}')
+				end
+			elseif text:find(''..u8:decode(masss[i])..'%[.+%]') and text:find('| Отправил') then
+				local idc = text:match('%[(%d+)%]')
+				if tostring(u8:decode(masss[i])):match('%a') then	
+					text = text:gsub(u8:decode(masss[i])..'%['..idc..'%]', '{'..colornikifama..'}'..u8:decode(masss[i])..'['..idc..']{00'..string.format('%X', bit.rshift(color, 8))..'}')
+				end
+			elseif text:find('%('..u8:decode(masss[i])..'%)') then
+				if tostring(u8:decode(masss[i])):match('%a') then	
+					text = text:gsub('%('..u8:decode(masss[i])..'%)', '{'..colornikifama..'}('..u8:decode(masss[i])..'){'..string.format('%X', bit.rshift(color, 8))..'}')
+				end
+			elseif text:find(u8:decode(masss[i])..':') then
+				if tostring(u8:decode(masss[i])):match('%a') then	
+					text = text:gsub(''..u8:decode(nikifama1.v)..':', '{'..colornikifama..'}'..u8:decode(masss[i])..':{'..string.format('%X', bit.rshift(color, 8))..'}')
+				end
+			elseif text:find(u8:decode(masss[i])) and not text:find('Объявление проверил сотрудник СМИ') then
+				if tostring(u8:decode(masss[i])):match('%a') then	
+					text = text:gsub(u8:decode(masss[i]), '{'..colornikifama..'}'..u8:decode(masss[i])..'{'..string.format('%X', bit.rshift(color, 8))..'}')
+				end
+			elseif text:find(u8:decode(masss[i])) and text:find('Объявление проверил сотрудник СМИ') then
+				if tostring(u8:decode(masss[i])):match('%a') then	
+					text = text:gsub(u8:decode(masss[i]), '{'..colornikifama..'}'..u8:decode(masss[i])..'{00'..string.format('%X', bit.rshift(color, 8))..'}')
+				end
 			end
 		end
-
-		if text:find('%[.+%]%s.+%s%a+_'..u8:decode(nikifama.v)..'%[.+%]: .+') then -- покраска ников фамы в /r, /f и чатах
-			local chats = { ['[F]'] = true, ['[R]'] = true, ['[T]'] = true }
-			local chat, zvan, nick, id, text2 = text:match('(%[.+%])%s(.+)%s(%a+_%a+)%[(%d+)%]: (.+)')
-			if ColorFama.v and chats[chat] then
-				return { color, chat..' '..zvan..' {'..u8:decode(colornikifama.v)..'}'..nick..'['..id..']: {'..string.format('%X', bit.rshift(color, 8))..'}'..text2 }
-			end
-		end
-		--Bruno_Lottero смотрит отчёт игрока Apolo_Lottero за сегодня
-		if text:find('%a+_'..u8:decode(nikifama.v)..' .+') and not text:find('сказал: {99ccff}.+') and not text:find('смотрит отчёт игрока') and color == -577699841 then -- покраска ников фамы в /me
-			local nick, text2 = text:match('(%a+_%a+) (.+)')
-			if ColorFama.v then
-				return { color, '{'..u8:decode(colornikifama.v)..'}'..nick..' {'..string.format('%X', bit.rshift(color, 8))..'}'..text2 }
-			end
-		end
-
-		if text:find('%a+_'..u8:decode(nikifama.v)..' смотрит отчёт игрока %a+_'..u8:decode(nikifama.v)..' за сегодня') then
-			local nick1, nick2 = text:match('(%a+_%a+) смотрит отчёт игрока (%a+_%a+) за сегодня')
-			if ColorFama.v then
-				return { color, '{'..u8:decode(colornikifama.v)..'}'..nick1..' {'..string.format('%X', bit.rshift(color, 8))..'}смотрит отчёт игрока {'..u8:decode(colornikifama.v)..'}'..nick2..' {'..string.format('%X', bit.rshift(color, 8))..'}за сегодня'}
-			end
-		end
-
-		if text:find('%a+_'..u8:decode(nikifama.v)..' смотрит отчёт игрока %a+_%a+ за сегодня') then
-			local nick1, nick2 = text:match('(%a+_%a+) смотрит отчёт игрока (%a+_%a+) за сегодня')
-			if ColorFama.v then
-				return { color, '{'..u8:decode(colornikifama.v)..'}'..nick1..' {'..string.format('%X', bit.rshift(color, 8))..'}смотрит отчёт игрока '..nick2..' {'..string.format('%X', bit.rshift(color, 8))..'}за сегодня'}
-			end
-		end
-
-		if text:find('%a+_%a+ смотрит отчёт игрока %a+_'..u8:decode(nikifama.v)..' за сегодня') then
-			local nick1, nick2 = text:match('(%a+_%a+) смотрит отчёт игрока (%a+_%a+) за сегодня')
-			if ColorFama.v then
-				return { color, ''..nick1..' {'..string.format('%X', bit.rshift(color, 8))..'}смотрит отчёт игрока {'..u8:decode(colornikifama.v)..'}'..nick2..' {'..string.format('%X', bit.rshift(color, 8))..'}за сегодня'}
-			end
-		end
-
-		if text:find('.+,%s%a+_'..u8:decode(nikifama.v)..' сказал: .+') then -- покраска ников фамы в /todo
-			local text1 ,nick, text2 = text:match('(.+),%s(%a+_%a+) сказал: (.+)')
-			if ColorFama.v then
-				return { color, '{'..string.format('%X', bit.rshift(color, 8))..'}'..text1..', {'..u8:decode(colornikifama.v)..'}'..nick..'{'..string.format('%X', bit.rshift(color, 8))..'} сказал: '..text2 }
-			end
-		end
-
-
-		if text:find(".+%s+%p+%a+_"..u8:decode(nikifama.v).."+%p") and color == -577699841 then -- покраска ников фамы в /do		
-			local text1, nick = text:match('(.+)%p+(%a+_%a+)%p')
-			if ColorFama.v then
-				return { color, '{'..string.format('%X', bit.rshift(color, 8))..'}'..text1..'{'..u8:decode(colornikifama.v)..'}('..nick..')'}
-			end
-		end
-
-		if text:find('%a+_'..u8:decode(nikifama.v)..'%[.+%] взял на военном складе .+') then -- покраска ников фамы при взятии гана на складе		
-			local nick, id, text1 = text:match('(%a+_%a+)%[(%d+)%] взял на военном складе (.+)')
-			if ColorFama.v then
-				return { color, '{'..u8:decode(colornikifama.v)..'}'..nick..'['..id..']{'..string.format('%X', bit.rshift(color, 8))..'} взял на военном складе '..text1}
-			end
-		end
-
-		if text:find('Администратор%s+%a+_'..u8:decode(nikifama.v)..'+%s+.+') and text:find('забанил' or 'кикнул' or 'выдал' or 'поставил затычку') then -- покраска ников фамы в красной строке админ действия
-			local nick, text1 = text:match('Администратор%s(%a+_%a+)%s(.+)')
-			if ColorFama.v then
-				return { color, 'Администратор {'..u8:decode(colornikifama.v)..'}'..nick..' {'..string.format('%X', bit.rshift(color, 8))..'}'..text1}
-			end
-		end
-
-		if text:find('Гос. новости:%s+%a+_'..u8:decode(nikifama.v)..'%[.+%]: .+') then -- покраска ников фамы в госках
-			local nick, id, text1 = text:match('Гос. новости:%s(%a+_%a+)%[(%d+)%]: (.+)')
-			if ColorFama.v then
-				return { color, 'Гос. новости: {'..u8:decode(colornikifama.v)..'}'..nick..'['..id..']: {'..string.format('%X', bit.rshift(color, 8))..'}'..text1}
-			end
-		end
-
-		if text:find('%a+_'..u8:decode(nikifama.v)..'%sпокинул вашу организацию по собственному желанию') then -- Перекраска ников фамы при /leave
-			local nick = text:match('(%a+_%a+)%sпокинул вашу организацию по собственному желанию')
-			if ColorFama.v then
-				return { color, '{'..u8:decode(colornikifama.v)..'}'..nick..' {'..string.format('%X', bit.rshift(color, 8))..'}покинул вашу организацию по собственному желанию'}
-			end
-		end
-
-		if text:find('.+%s+|+%sОтправил%s+%a+_'..u8:decode(nikifama.v)..'%[.+%] .+') then -- перекраска ников фамы в первой строке объявы
-			local text1, nick, id, text2 = text:match('(.+)%s+|+%sОтправил%s+(%a+_%a+)%[(%d+)%] (.+)')
-			if ColorFama.v then
-				return { color, ''..text1..' | Отправил {'..u8:decode(colornikifama.v)..'}'..nick..'['..id..'] {00cc00}'..text2}
-			end
-		end
-
-		if text:find('.+ сотрудник СМИ %a+_'..u8:decode(nikifama.v)..'') then -- перекраска ников фамы во второй строке объявы
-			local text1, nick = text:match('(.+) сотрудник СМИ (%a+_%a+)')
-			if ColorFama.v then
-				return { color, text1..' сотрудник СМИ {'..u8:decode(colornikifama.v)..'}'..nick}
-			end
-		end
-
-		if text:find('%p+%p+%s+%a+_'..u8:decode(nikifama.v)..'%[.+%]: .+ %p+%p') then
-			local nick, id, text1 = text:match('%p+%p+%s+(%a+_%a+)%[(%d+)%]: (.+) %p+%p')
-			if ColorFama.v then
-				return { color, '(( {'..u8:decode(colornikifama.v)..'}'..nick..'['..id..']: {'..string.format('%X', bit.rshift(color, 8))..'}'..text1..' ))'}
-			end
-		end
-
-		--[[if text:find('Администратор%s+%a+_'..u8:decode(nikifama.v)..':+%s+.+') then -- покрастка ников фамы в админском сообщении
-			local nick, text1 = text:match('Администратор%s(%a+_%a+):%s(.+)')
-			if ColorFama.v then
-				return { color, 'Администратор {'..u8:decode(colornikifama.v)..'}'..nick..': {'..string.format('%X', bit.rshift(color, 8))..'}'..text1}
-			end
-		end]]
-
-		if text:find('Администратор%s+%a+_%a+%s+.+%s%a+_'..u8:decode(nikifama.v)..'.+ Причина: .+') then -- покрастка ников фамы в админском сообщении
-			local text1, nick, text2 = text:match('(Администратор%s+%a+_%a+%s+.+)%s(%a+_%a+)(.+ Причина: .+)')
-			if ColorFama.v then
-				return { color, ''..text1..' {'..u8:decode(colornikifama.v)..'}'..nick..'{'..string.format('%X', bit.rshift(color, 8))..'}'..text2}
-			end
-		elseif text:find('Администратор%s+%a+_'..u8:decode(nikifama.v)..':+%s+.+') then 
-			local nick, text1 = text:match('Администратор%s(%a+_%a+):%s(.+)')
-			if ColorFama.v then
-				return { color, 'Администратор {'..u8:decode(colornikifama.v)..'}'..nick..': {'..string.format('%X', bit.rshift(color, 8))..'}'..text1}
-			end
-		elseif text:find('Администратор%s+%a+_'..u8:decode(nikifama.v)..'%s+.+%s%a+_'..u8:decode(nikifama.v)..'.+ Причина: .+') then
-			local nick1, text1, nick2, text2 = text:match('Администратор%s+(%a+_%a+)%s+(.+)%s(%a+_%a+)(.+ Причина: .+)')
-			if ColorFama.v then
-				return { color, 'Администратор {'..u8:decode(colornikifama.v)..'}'..nick1..' {'..string.format('%X', bit.rshift(color, 8))..'}'..text1..' {'..u8:decode(colornikifama.v)..'}'..nick2..'{'..string.format('%X', bit.rshift(color, 8))..'}'..text2}
-			end
-		end
+		return { color, text }
 	end
 end
+
 
 function load_settings() -- загрузка настроек
 	-- CONFIG CREATE/LOAD
@@ -4770,7 +4619,19 @@ function load_settings() -- загрузка настроек
 	autopass = imgui.ImBuffer(u8(ini.settings.autopass), 256)
 	gnewstag = imgui.ImBuffer(u8(ini.settings.gnewstag), 20)
 	colornikifama = imgui.ImBuffer(u8(ini.settings.colornikifama), 7)
-	nikifama = imgui.ImBuffer(u8(ini.settings.nikifama), 20)
+	nikifama1 = imgui.ImBuffer(u8(ini.settings.nikifama1), 40)
+	nikifama2 = imgui.ImBuffer(u8(ini.settings.nikifama2), 40)
+	nikifama3 = imgui.ImBuffer(u8(ini.settings.nikifama3), 40)
+	nikifama4 = imgui.ImBuffer(u8(ini.settings.nikifama4), 40)
+	nikifama5 = imgui.ImBuffer(u8(ini.settings.nikifama5), 40)
+	nikifama6 = imgui.ImBuffer(u8(ini.settings.nikifama6), 40)
+	nikifama7 = imgui.ImBuffer(u8(ini.settings.nikifama7), 40)
+	nikifama8 = imgui.ImBuffer(u8(ini.settings.nikifama8), 40)
+	nikifama9 = imgui.ImBuffer(u8(ini.settings.nikifama9), 40)
+	nikifama10 = imgui.ImBuffer(u8(ini.settings.nikifama10), 40)
+	textprivet = imgui.ImBuffer(u8(ini.settings.textprivet), 256)
+	Secondcolor = imgui.ImBuffer(u8(ini.settings.Secondcolor), 20)
+	textpriv = imgui.ImBuffer(u8(ini.settings.textpriv), 256)
 	blackcheckerpath = imgui.ImBuffer(u8(ini.settings.blackcheckerpath), 256)
 	
 	timefix = imgui.ImInt(ini.settings.timefix)
@@ -4805,8 +4666,8 @@ function load_settings() -- загрузка настроек
 	chatInfo = imgui.ImBool(ini.settings.chatInfo)
 	armOn = imgui.ImBool(ini.settings.armOn)
 	timecout = imgui.ImBool(ini.settings.timecout)
-	rtag = imgui.ImBuffer(u8(ini.settings.tag), 256)
-	zp = imgui.ImBool(ini.vkint.zp)
+	rtag = imgui.ImBuffer(u8(ini.settings.rtag), 256)
+	ftag = imgui.ImBuffer(u8(ini.settings.ftag), 256)
 	nickdetect = imgui.ImBool(ini.vkint.nickdetect)
 	pushv = imgui.ImBool(ini.vkint.pushv)
 	smsinfo = imgui.ImBool(ini.vkint.smsinfo)
@@ -4814,6 +4675,7 @@ function load_settings() -- загрузка настроек
 	getradio = imgui.ImBool(ini.vkint.getradio)
 	familychat = imgui.ImBool(ini.vkint.familychat)
 	enable_tag = imgui.ImBool(ini.settings.enable_tag)
+	FPSunlock = imgui.ImBool(ini.settings.FPSunlock)
 	gos1 = imgui.ImBuffer(u8(ini.settings.gos1), 256)
 	gos2 = imgui.ImBuffer(u8(ini.settings.gos2), 256)
 	gos3 = imgui.ImBuffer(u8(ini.settings.gos3), 256)
@@ -4835,6 +4697,11 @@ function load_settings() -- загрузка настроек
 	infoY2 = ini.settings.infoY2
 	findX = ini.settings.findX
 	findY = ini.settings.findY
+	R = ini.settings.R
+	G = ini.settings.G
+	B = ini.settings.B
+	Theme = ini.settings.Theme
+	SCRIPTCOLOR = ini.settings.SCRIPTCOLOR
 	asX = ini.assistant.asX
 	asY = ini.assistant.asY
 	-- END CONFIG WORKING
@@ -4846,13 +4713,13 @@ function cmd_histid(params) -- история ников по ID
 		params = tonumber(params:match("^(%d+)"))
 		if sampIsPlayerConnected(params) or myID == tonumber(params) then
 			local histnick = sampGetPlayerNickname(params)
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Проверяем историю ников игрока "..histnick..".", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Проверяем историю ников игрока "..histnick..".", SCRIPTCOLOR)
 			sampSendChat("/history "..histnick)
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу.", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу.", SCRIPTCOLOR)
 		end
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /hist [ID].", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /hist [ID].", SCRIPTCOLOR)
 	end
 end
 
@@ -4863,7 +4730,7 @@ function rradio(params) -- обработка /r
 			if params:find("%(%(") or params:find("%)%)") or params:find("%)") or params:find("%(") then
 				params = params:gsub("%(", "")
 				params = params:gsub("%)", "")
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Сообщение определено как OOC и автоматически обработано. Запрещенные символы: %( и %).", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Сообщение определено как OOC и автоматически обработано. Запрещенные символы: %( и %).", SCRIPTCOLOR)
 				sampSendChat(string.format("/r (( %s ))", params))
 			else
 				if rtag.v == '' then
@@ -4873,10 +4740,10 @@ function rradio(params) -- обработка /r
 				end
 			end
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /r [text].", 0x046D63)	
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /r [text].", SCRIPTCOLOR)	
 		end
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Вам недоступна данная рация.", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Вам недоступна данная рация.", SCRIPTCOLOR)
 	end
 end
 
@@ -4886,27 +4753,27 @@ function fradio(params) -- обработка /f
 		if params:find("%(%(") or params:find("%)%)") or params:find("%)") or params:find("%(") then
 			params = params:gsub("%(", "")
 			params = params:gsub("%)", "")
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Сообщение определено как OOC и автоматически обработано. Запрещенные символы: %( и %).", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Сообщение определено как OOC и автоматически обработано. Запрещенные символы: %( и %).", SCRIPTCOLOR)
 			sampSendChat(string.format("/f (( %s ))", params))
 		else 
 			if mtag == "M" then
 				sampSendChat(string.format("/f %s", params))
 			else
-				if rtag.v == '' then
+				if ftag.v == '' then
 					sampSendChat(string.format("/f %s", params))
 				else
-					sampSendChat(string.format("/f [%s • %s]: %s", mtag, u8:decode(rtag.v), params))
+					sampSendChat(string.format("/f [%s]: %s", u8:decode(ftag.v), params))
 				end
 			end
 		end
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /f [text].", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /f [text].", SCRIPTCOLOR)
 	end
 end
 
 function cmd_livrby(params) -- просьба увала
 	if isPlayerSoldier then
-		if nasosal_rang <= 4 and nasosal_rang ~= 10 and nasosal_rang ~= 8 and nasosal_rang ~= 8 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 5 по 7 ранг.", 0x046D63) return end
+		if nasosal_rang <= 4 and nasosal_rang ~= 10 and nasosal_rang ~= 8 and nasosal_rang ~= 8 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 5 по 7 ранг.", SCRIPTCOLOR) return end
 		if params:match("^%d+%s.*") then
 			local livid, rsn = params:match("^(%d+)%s(.*)")
 			if sampIsPlayerConnected(livid) then
@@ -4919,64 +4786,77 @@ function cmd_livrby(params) -- просьба увала
 					sampSendChat(string.format("/r [%s]: Причина: %s", u8:decode(rtag.v), rsn))
 				end
 			else
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", SCRIPTCOLOR)
 			end
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /livr [ID] [Причина].", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /livr [ID] [Причина].", SCRIPTCOLOR)
 		end
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Недоступно на данном сервере или вы не военнослужащий.", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Недоступно на данном сервере или вы не военнослужащий.", SCRIPTCOLOR)
 	end
 end
 
 function cmd_livfby(params) -- просьба увала
 	if isPlayerSoldier then
-		if nasosal_rang <= 4 and nasosal_rang ~= 10 and nasosal_rang ~= 8 and nasosal_rang ~= 8 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 5 по 7 ранг.", 0x046D63) return end
+		if nasosal_rang <= 4 and nasosal_rang ~= 10 and nasosal_rang ~= 8 and nasosal_rang ~= 8 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 5 по 7 ранг.", SCRIPTCOLOR) return end
 		if params:match("^%d+%s.*") then
 			local livid, rsn = params:match("^(%d+)%s(.*)")
 			if sampIsPlayerConnected(livid) then
 				local livname = string.gsub(sampGetPlayerNickname(livid), '_', ' ')
-				if rtag.v == '' then
+				if ftag.v == '' then
 					sampSendChat(string.format("/f Запрашиваю отставку бойца %s#%d.", livname, livid))
 					sampSendChat(string.format("/f Причина: %s", rsn))
 				else
-					sampSendChat(string.format("/f [%s]: Запрашиваю отставку бойца %s#%d.", u8:decode(rtag.v), livname, livid))
-					sampSendChat(string.format("/f [%s]: Причина: %s", u8:decode(rtag.v), rsn))
+					sampSendChat(string.format("/f [%s]: Запрашиваю отставку бойца %s#%d.", u8:decode(ftag.v), livname, livid))
+					sampSendChat(string.format("/f [%s]: Причина: %s", u8:decode(ftag.v), rsn))
 				end
 			else
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", SCRIPTCOLOR)
 			end
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /livf [ID] [Причина].", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /livf [ID] [Причина].", SCRIPTCOLOR)
 		end
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Недоступно на данном сервере или вы не военнослужащий.", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Недоступно на данном сервере или вы не военнослужащий.", SCRIPTCOLOR)
 	end
 end
 
-function livraport(params) -- просьба увала [Рапорт отстранения]: Ник отстранен. Причина: Сон в неположенном месте.
+function livraport(params) -- просьба увала [Рапорт отстранения]: Ник отстранен. Причина: Сон в неположенном месте.               [Рапорт отстранения]: Жетон id отстранен. Причина: причина
 	if isPlayerSoldier then
-		if nasosal_rang <= 4 and nasosal_rang ~= 10 and nasosal_rang ~= 8 and nasosal_rang ~= 8 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 5 по 7 ранг.", 0x046D63) return end
+		if nasosal_rang <= 4 then 
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 5 по 7 ранг.", SCRIPTCOLOR) 
+			return 
+		end
 		if params:match("^%d+%s.*") then
 			local livid, rsn = params:match("^(%d+)%s(.*)")
 			if sampIsPlayerConnected(livid) then
 				local livname = string.gsub(sampGetPlayerNickname(livid), '_', ' ')	
-				sampSendChat(string.format("/f [Рапорт отстранения]: %s отстранен.", livname))
-				sampSendChat(string.format("/f Причина: %s", rsn))	
+				sampSendChat(string.format("/do [Рапорт отстранения]: Жетон %d отстранен. Причина: %s", livid, rsn))
+				if nasosal_rang > 7 then
+					lua_thread.create(function()
+						if rpuninvoff.v then
+							sampSendChat("/me "..(lady.v and 'достала' or 'достал').." КПК, после чего "..(lady.v and 'вошла' or 'зашел').." в базу данных военнослужащих")
+							wait(1000)
+							sampSendChat(string.format("/me "..(lady.v and 'отметила' or 'пометил').." личное дело %d как «Уволен»", livid))
+							wait(250)
+						end
+						sampSendChat(string.format("/uninviteoff %d %s", livid, rsn))
+					end)
+				end
 			else
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", SCRIPTCOLOR)
 			end
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /raport [ID] [Причина].", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /raport [ID] [Причина].", SCRIPTCOLOR)
 		end
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Недоступно на данном сервере или вы не военнослужащий.", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Недоступно на данном сервере или вы не военнослужащий.", SCRIPTCOLOR)
 	end
 end
 
 function ex_uninvite(params) -- увал из организации
 	if isPlayerSoldier then
-		if nasosal_rang <= 7 and developMode ~= 1 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 8 ранга.", 0x046D63) return end
+		if nasosal_rang <= 7 and developMode ~= 1 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 8 ранга.", SCRIPTCOLOR) return end
 		if params:match("^%d+%s.*") then
 			local uid, ureason = params:match("^(%d+)%s(.*)")
 			if sampIsPlayerConnected(uid) then
@@ -4988,24 +4868,24 @@ function ex_uninvite(params) -- увал из организации
 						sampSendChat(string.format("/me "..(lady.v and 'отметила' or 'отметил').." личное дело %s как «Уволен»", uname))
 						wait(250)
 
-						if rtag.v == '' then
+						if ftag.v == '' then
 							sampSendChat(string.format("/f Боец %s был отправлен в отставку.", mtag, uname))
 							wait(500)
 							sampSendChat(string.format("/f Причина отставки: %s", ureason))
 						else
-							sampSendChat(string.format("/f %s: Боец %s был отправлен в отставку.", u8:decode(rtag.v), uname))
+							sampSendChat(string.format("/f [%s]: Боец %s был отправлен в отставку.", u8:decode(ftag.v), uname))
 							wait(500)
-							sampSendChat(string.format("/f %s: Причина отставки: %s", u8:decode(rtag.v), ureason))
+							sampSendChat(string.format("/f [%s]: Причина отставки: %s", u8:decode(ftag.v), ureason))
 						end
 					end
 					wait(250)
 					sampSendChat(string.format("/uninvite %d %s", uid, ureason))
 				end)
 			else
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", SCRIPTCOLOR)
 			end
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /uninvite [ID] [Причина].", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /uninvite [ID] [Причина].", SCRIPTCOLOR)
 		end
 	else
 		sampSendChat("/uninvite "..params)
@@ -5014,7 +4894,7 @@ end
 
 function ex_uninviteoff(params) -- увал в оффе
 	if isPlayerSoldier then
-		if nasosal_rang ~= 10 and developMode ~= 1 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна только лидеру.", 0x046D63) return end
+		if nasosal_rang ~= 10 and developMode ~= 1 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна только лидеру.", SCRIPTCOLOR) return end
 		if params:match("^%S+%s.*") then
 			local uid, ureason = params:match("^(%S+)%s(.*)")	
 			local uname = uid:gsub('_', ' ')
@@ -5025,20 +4905,20 @@ function ex_uninviteoff(params) -- увал в оффе
 					sampSendChat(string.format("/me "..(lady.v and 'отметила' or 'пометил').." личное дело %s как «Уволен»", uname))
 					wait(250)
 
-					if rtag.v == '' then
+					if ftag.v == '' then
 						sampSendChat(string.format("/f Боец %s был отправлен в отставку.", uname))
 						wait(500)
 						sampSendChat(string.format("/f Причина отставки: %s", ureason))
 					else
-						sampSendChat(string.format("/f %s: Боец %s был отправлен в отставку.", u8:decode(rtag.v), uname))
+						sampSendChat(string.format("/f [%s]: Боец %s был отправлен в отставку.", u8:decode(ftag.v), uname))
 						wait(500)
-						sampSendChat(string.format("/f %s: Причина отставки: %s", u8:decode(rtag.v), ureason))
+						sampSendChat(string.format("/f [%s]: Причина отставки: %s", u8:decode(ftag.v), ureason))
 					end
 				end
 				sampSendChat(string.format("/uninviteoff %s %s", uid, ureason))
 			end)
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /uninviteoff [Ник] [Причина].", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /uninviteoff [Ник] [Причина].", SCRIPTCOLOR)
 		end
 	else
 		sampSendChat("/uninviteoff "..params)
@@ -5047,7 +4927,7 @@ end
 
 function ex_skin(params) -- смена скина
 	if isPlayerSoldier then
-		if (nasosal_rang <= 7) and (developMode ~= 1) then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 8 ранга.", 0x046D63) return end
+		if (nasosal_rang <= 7) and (developMode ~= 1) then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 8 ранга.", SCRIPTCOLOR) return end
 		if params:match("^%d+") then
 			local uid = params:match("^(%d+)")
 			if sampIsPlayerConnected(uid) or myID == tonumber(params) then
@@ -5062,10 +4942,10 @@ function ex_skin(params) -- смена скина
 					sampSendChat(string.format("/changeskin %d", uid))
 				end)
 			else
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу.", SCRIPTCOLOR)
 			end
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /changeskin [ID].", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /changeskin [ID].", SCRIPTCOLOR)
 		end
 	else
 		sampSendChat("/changeskin "..params)
@@ -5074,13 +4954,13 @@ end
 
 function ex_rang(params) -- повышение ранга
 	if isPlayerSoldier then
-		if nasosal_rang <= 8 and developMode ~= 1 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 9 ранга.", 0x046D63) return end
+		if nasosal_rang <= 8 and developMode ~= 1 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 9 ранга.", SCRIPTCOLOR) return end
 		if params:match("^%d+%s%d+%s.*") then
 			local uid, rcout, utype = params:match("^(%d+)%s(%d+)%s(.*)")
 			rcout = tonumber(rcout)
 			if sampIsPlayerConnected(uid) then
 				lua_thread.create(function()
-					if rcout <= 0 or rcout >= 5 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Ограничение на количество повышения от 1 до 4.", 0x046D63) return end
+					if rcout <= 0 or rcout >= 5 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Ограничение на количество повышения от 1 до 4.", SCRIPTCOLOR) return end
 					if rprang.v then
 						local uname = sampGetPlayerNickname(uid):gsub('_', ' ')
 						sampSendChat("/do Сумка с новыми погонами в руке.")
@@ -5108,15 +4988,15 @@ function ex_rang(params) -- повышение ранга
 							wait(1500)
 							sampSendChat("Дико извиняюсь, я малость заработался..")
 						else
-							sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы ввели неверный тип [+/-].", 0x046D63) return
+							sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы ввели неверный тип [+/-].", SCRIPTCOLOR) return
 						end
 					end
 				end)
 			else
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", SCRIPTCOLOR)
 			end
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /rang [ID] [Количество] [+/-].", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /rang [ID] [Количество] [+/-].", SCRIPTCOLOR)
 		end
 	else
 		sampSendChat("/rang "..params)
@@ -5125,7 +5005,7 @@ end
 
 function ex_invite(params) -- инвайты игроков
 	if isPlayerSoldier then
-		if nasosal_rang <= 8 and developMode ~= 1 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 9 ранга.", 0x046D63) return end
+		if nasosal_rang <= 8 and developMode ~= 1 then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 9 ранга.", SCRIPTCOLOR) return end
 		if params:match("^%d+") then
 			local uid, utype = params:match("^(%d+)")
 			if sampIsPlayerConnected(uid) then
@@ -5152,10 +5032,10 @@ function ex_invite(params) -- инвайты игроков
 					sampSendChat(string.format("/invite %d", uid))
 				end)
 			else
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", SCRIPTCOLOR)
 			end
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /invite [ID].", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /invite [ID].", SCRIPTCOLOR)
 		end
 	else
 		sampSendChat("/invite "..params)
@@ -5164,7 +5044,7 @@ end
 
 function cmd_uninvby(params) -- увал по просьбе
 	if isPlayerSoldier then
-		if nasosal_rang <= 7 and developMode ~= 1 and mtag ~= "M" then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 8 ранга и лидеру организации.", 0x046D63) return end
+		if nasosal_rang <= 7 and developMode ~= 1 and mtag ~= "M" then sampAddChatMessage("[MoD-Helper]{FFFFFF} Данная команда доступна с 8 ранга и лидеру организации.", SCRIPTCOLOR) return end
 		if params:match("^%d+%s%d+%s.*") then
 			local livid, fromid, rsn = params:match("^(%d+)%s(%d+)%s(.*)")
 			if sampIsPlayerConnected(livid) then 
@@ -5178,21 +5058,21 @@ function cmd_uninvby(params) -- увал по просьбе
 						sampSendChat(string.format("/me "..(lady.v and 'пометила' or 'отметил').." личное дело %s как «Уволен»", uname))
 						wait(250)
 
-						if rtag.v == '' then
-							sampSendChat(string.format("/т Боец %s был отправлен в отставку по жалобе офицера.", uname))
+						if ftag.v == '' then
+							sampSendChat(string.format("/f Боец %s был отправлен в отставку по жалобе офицера.", uname))
 							sampSendChat(string.format("/f Причина отставки: %s | Офицер: %s", rsn, fromid))
 						else
-							sampSendChat(string.format("/f %s: Боец %s был отправлен в отставку по жалобе офицера.", u8:decode(rtag.v), uname))
-							sampSendChat(string.format("/f %s: Причина отставки: %s | Офицер: %s", u8:decode(rtag.v), rsn, fromid))
+							sampSendChat(string.format("/f [%s]: Боец %s был отправлен в отставку по жалобе офицера.", u8:decode(ftag.v), uname))
+							sampSendChat(string.format("/f [%s]: Причина отставки: %s | Офицер: %s", u8:decode(ftag.v), rsn, fromid))
 						end
 					end
 					sampSendChat(string.format("/uninvite %d %s | %s ", livid, rsn, fromid))
 				end)
 			else
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", SCRIPTCOLOR)
 			end
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /uninv [ID] [ID офицера] [Причина].", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /uninv [ID] [ID офицера] [Причина].", SCRIPTCOLOR)
 		end
 	end
 end
@@ -5208,10 +5088,10 @@ function cmd_where(params) -- запрос местоположения
 				sampSendChat(string.format("/r [%s]: %s, доложите свое местоположение. На ответ 20 секунд.", u8:decode(rtag.v), name))
 			end
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", SCRIPTCOLOR)
 		end
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /where [ID].", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /where [ID].", SCRIPTCOLOR)
 	end
 end
 
@@ -5226,10 +5106,10 @@ function cmd_ok(params) -- прием докладов
 				sampSendChat(string.format("/r [%s]: %s, ваш доклад принят!", u8:decode(rtag.v), name))
 			end
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу или указан ваш ID.", SCRIPTCOLOR)
 		end
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /ok [ID].", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /ok [ID].", SCRIPTCOLOR)
 	end
 end
 
@@ -5239,10 +5119,10 @@ function ex_dice(params) -- еще одна часть антиказино, если включено - /dice отр
 			local casinoID, cmoney = params:match("^(%d+)%s(%d+)")
 			sampSendChat(string.format("/dice %d %d", casinoID, cmoney))
 		else
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /dice [ID] [Ставка].", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /dice [ID] [Ставка].", SCRIPTCOLOR)
 		end
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Мы сохраним ваши средства и не позволим их слить!", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Мы сохраним ваши средства! Лучше отправь их на 89799(Red) или 1655(Lime).", SCRIPTCOLOR)
 	end
 end
 
@@ -5271,10 +5151,10 @@ function cmd_ud(params) -- удостоверение только для вояк
 					wait(800)
 					sampSendChat("/me "..(lady.v and 'убрала' or 'убрал').." удостоверение обратно")
 				else
-					sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу.", 0x046D63)
+					sampAddChatMessage("[MoD-Helper]{FFFFFF} Игрок с данным ID не подключен к серверу.", SCRIPTCOLOR)
 				end
 			else
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /ud [ID].", 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /ud [ID].", SCRIPTCOLOR)
 			end
 		end
 	end)
@@ -5285,7 +5165,7 @@ function cmd_rn(params) -- OOC чат /r
 		params = tostring(params:match("^(.*)"))
 		sampSendChat("/r (( "..params.. " ))")
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /rn [text].", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /rn [text].", SCRIPTCOLOR)
 	end
 end
 
@@ -5294,7 +5174,7 @@ function cmd_fn(params) -- OOC чат /f
 		params = tostring(params:match("^(.*)"))
 		sampSendChat("/f (( "..params.. " ))")
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /fn [text].", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /fn [text].", SCRIPTCOLOR)
 	end
 end
 
@@ -5365,7 +5245,7 @@ function sampev.onSetCheckpoint(position,radius)
 	pX, pY, pZ = getCharCoordinates(playerPed)
 	if getDistanceBetweenCoords3d(pX, pY, pZ, 2235.00, 1604.00, 1006.00) < 50 then -- проверяем игрока на калигулу
 		if casinoBlock.v then
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} Ваши деньги - наша задача, лучше переведи на 74374(на шоко), чем слей в казике!", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} Ваши деньги - наша задача! Лучше отправь их на 89799(Red) или 1655(Lime)., чем слей в казике!", SCRIPTCOLOR)
 			reconnect()
 			return false
 		end
@@ -5391,7 +5271,7 @@ function random_messages() -- рандомные сообщения
 			math.randomseed(os.time())
 			wait(300000)
 			for _, v in pairs(messages[math.random(1, #messages)]) do
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} "..v, 0x046D63)
+				sampAddChatMessage("[MoD-Helper]{FFFFFF} "..v, SCRIPTCOLOR)
 			end
 			wait(3000000)
 		end
@@ -5411,17 +5291,17 @@ function cmd_rd(params) -- доклады в /r чат
 			end)
 		end
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /rd [Пост] [Состояние].", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /rd [Пост] [Состояние].", SCRIPTCOLOR)
 	end
 end
 
 function cmd_fd(params) -- доклады в /f чат
 	if params:match("^.*%s.*") then
 		local post, sost = params:match("^(.*)%s(.*)")
-		if rtag.v == '' then
+		if ftag.v == '' then
 			sampSendChat(string.format("/f Докладываю, пост: %s | Состояние: %s", post, sost))
 		else
-			sampSendChat(string.format("/f %s: Докладываю, пост: %s | Состояние: %s", u8:decode(rtag.v), post, sost))
+			sampSendChat(string.format("/f [%s]: Докладываю, пост: %s | Состояние: %s", u8:decode(ftag.v), post, sost))
 		end
 		if screenSave.v then
 			lua_thread.create(function()
@@ -5431,7 +5311,7 @@ function cmd_fd(params) -- доклады в /f чат
 			end)
 		end
 	else
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /fd [Пост] [Состояние].", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Используйте: /fd [Пост] [Состояние].", SCRIPTCOLOR)
 	end
 end
 
@@ -5447,13 +5327,13 @@ end
 function drone() -- дрон/камхак, дополнение камхака санька
 	lua_thread.create(function()
 		if droneActive then
-			sampAddChatMessage("[MoD-Helper]{FFFFFF} На данный момент вы уже управляете дроном.", 0x046D63)
+			sampAddChatMessage("[MoD-Helper]{FFFFFF} На данный момент вы уже управляете дроном.", SCRIPTCOLOR)
 			return
 		end
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Управление дроном клавишами: {00C2BB}W, A, S, D, Space, Shift{FFFFFF}.", 0x046D63)
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Режимы дрона: {00C2BB}Numpad1, Numpad2, Numpad3{FFFFFF}.", 0x046D63)
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Скорость полета дрона: {00C2BB}+(быстрей), -(медленней){FFFFFF}.", 0x046D63)
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Заверешить пилотирование дроном можно клавишей {00C2BB}Enter{FFFFFF}.", 0x046D63)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Управление дроном клавишами: {"..u8:decode(Secondcolor.v).."}W, A, S, D, Space, Shift{FFFFFF}.", SCRIPTCOLOR)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Режимы дрона: {"..u8:decode(Secondcolor.v).."}Numpad1, Numpad2, Numpad3{FFFFFF}.", SCRIPTCOLOR)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Скорость полета дрона: {"..u8:decode(Secondcolor.v).."}+(быстрей), -(медленней){FFFFFF}.", SCRIPTCOLOR)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Заверешить пилотирование дроном можно клавишей {"..u8:decode(Secondcolor.v).."}Enter{FFFFFF}.", SCRIPTCOLOR)
 		while true do
 			wait(0)
 			if flymode == 0 then
@@ -5787,6 +5667,13 @@ function getFilesSpur()
 	end
 	return files, window_file
 end
+
+function fpsUnlock(status)
+    if isSampLoaded() then
+        memory.setuint8(getModuleHandle("samp.dll") + 0x9D170, status and 0xC3 or 0x51, true)
+    end
+end
+
 
 JLeYBxvRA2eDCYh6nBEv5mfKGPNn = "x-hVJ3rNnaZH?GA#ESF*#^mG-EWPsVHhMd&8Ud#9zVz7r#U2zve=Zx9f6?WuY?syRvUzwnu_5jnJ@C6qtHTG!%t34dTJMCS3k-py4eRjN2YGB+7UdbwEKS$5+TKY-qp3+umEW7DNrE?&h&D4mB3cv-AQ=!-tGd_3r4a3Q8Uu5=BSEyeKVn#9@rL2PA?d*y6qMMAz47Cwx@346bsPULwDaRpP4?ETr!^XzxHXh-hExyPnDNBexgdGYSvwHwJ-H7Lw44h@r*h9kpL8@BezMA36cKJrs#W%gbaXxHnUMY3-jJdeKHu+z5q#D7-VZ!#JJ3CxMPwVWf$dumKRvqLQRjUZtEJgjy_egY^LdcM5dWQLP8a*JAtJwTRVw*$t_Wzxxsd+b+4#pZAFc%*mGhRBne#KdEz6x_eT$p7WWBwhy6SQqbQFzR8tRF*&YMx*=guZ36URy9@fNqs9Ss9^TNZrdPwEZLQ_m9=b7V&z$crXS^e?z*=n!*A^LR27qmb?VT_$!86+5%XKVTbGJ!rGjdhMLWa&7SWPpy_geu-QL^uQzqy84yvd6!#Q?z-7hU*5?9fpwbyg7xMWMxWGBWbac*uaQzWz6$*WVf*&gY?%-c@7tH?nYkzQdd^?YUaLn*zq6GvkhPjm6fp?N3QLERv@5V9*NTnNpuJPS?@Mc3m*#qEQZtX9xrBKN+N6!63%Pmh@UP&XA-5eQK_8TB?f9g6v&Dc+%n7%tcHLs7cHsTHfFtr%ZcV3QvqGTDLbDjRYHw*3M#P9fkL*G57aUcXvK@aV_p6Uc3KWDQcRcS&&NwG#_a8wQj#6xYn^A@zG^*e_tRR9RWY?&hRwr3^H9y7gQZr#m_ZnbrhBKUNJs?PHGk9!ugHUnr7qAXjpq$2wwUe_BjdNLrwtKzf6C4YY!8KU&7Yvw^M=QsTdgT8jsX@X@fM-pBjwS@vw?C@EHEnWv+9VQ*6hY6pwZgbu%MTdWK9FxA**+5uS2jJZm2$XxEpXuXFQVA!$FVDpb@jQ#Mz6$LVj-chE@gA?ZmtKMz2KaaFD552Xe#tE9bTX5%xqHCp*$ydkH2J8ucBQmDDwZDz^m-@REcRgkX9z4JMnLMBCkL-?V93@WS+n*bTq!-89Bfy+mF??Uy7RYLEmt!Mg$5L=&aBxwryh5cV5wnXpue4mG_Q?g6W=xV5xP+@xmDMgsBChQjaWjTY_%*L^tKysLjJnz=4C##_gz5p=T$TA3#yBy&ZXYU$LFY4c?kgqWXLVS%dV+kp!XvWKp5gzy@#caDK6JZChGW?6!FBGKerk-@E#ny6_%?EjGLdYuKn!3wTY&zu$XQCtF%UqMc&Kk+*rjtnbV9H$n?Tx5uXrbNBm!rEtJUub2MEP&L%tu!PZF=&%D_r=B_GzEQS%Kz^!EYapczQG3_Pj#*h+D@txatnStfwTmVF3*CHcL&nq_xGGQcTYxR9zHr&m2$gUg-v64PqAgp-ncUvPvqG_PM5YC8EJPp^GV&%Y8QP$jGvH9&PQBJx%b*mVRN5gEs7ZrW7pJn8ge=rY3VDwk@8%RQg=!cKW==C&V@#Cf#mcLB%vtm!s&8y?9R+zj2$t5cr#bR#K@qw^k=#dTVf#44LLywdJepF_M@d&5#5*atZ!!grD-tmK_7jE-#udfvG4r#9CZ+z6+$Hch_DGnT6T3^!HByfu48fh&Ac%t!*m4_H*pLy8PaM$TEJTts9mT9SdT9!V6uyFZP?CnA&@7ww&N+Vf=CCp4#qk+BAPz^g!fnUqSSU5zr^3dgELx_XWBnbsLeX$xs^=b?!Er&HQQKY&SnLxg6j3cZbA3G%j?WrKFbk6q^ZkTmqTJjfu38X^hdRNvFZSpE+tV+4pH6!phm=&nP$cG?t^ZXvTLTrJF^CHV8H#-uWxzU#%+dwG#6r7Y5YCYPUvdyE8d-tX$f$@@EZAT$vzpJyZqP_r^%pryk@%-U_qFsc?Jztd%2Qu8W-3MKk9atygs7R9n*4+29*+_SQ_7vAmY&$nyzb*QhKx$nWuwhPMeS=GeT^r2kxsw#b?btLt4pj+S-tfYHzVH+8eCWhS8w3nJYc9AC!%"
 KGd6r35fZhsFvb3xpWVZddmT3XP6B2 = "Pswyp2!7%_HCnpWn8%$EgunCkx=82W24t4T$GvWGRVby3_s5Ve5fM9nfZ338bTHf-x2vLs%NcA@S63$v#MJ@=-h*YwgArbU+jYHha&z?Q$5GM!jxE8RDHdveHS@-twZ2dnYRp+rUF+Xy5y4#c^m6j8fgkwQZRfLnAhcZ5-ZnYXzxshkqVLJE2WA-5RXN$ZTXhQv=-e#aT2K_w@u83mr*3bKgxBdg_CUukP4APQ#gbFuUkMbN3rQkGgVMeV2NHB5k_u?HtmP#g$pmnxP%GA*qz4F!D=-Hjk5ud7vMVbYVx$gvVp^b-82BNsDmqN%9N*GEc6yw9478NG3_FN!vky?TV6Pw5A6w$5HeA8uVzbymFyekhu=*9eWj+UZQaJP7Zbqwz%kr#TE7Nnt$+vEjUgbpUMPgA6SpkrZcrhL?J?#MPsWY7Zj%6H*k5unDUBu894J7zrsxrjL+CN9ypzhZvNwuydTrpcwt_Q9bmpSdbh9z2dSVh-frxryMQXD5++SZzqDdJnwt_E#?GM_dgSSk#+3WvPxMD&MhdUZWaysCYH8AdejwqR!3XU=NETDXYvU26dKtvM4qwNpgbGUM&uq%naeh!cLvKzb!sz5umR=pV@G6tmA@UYa5Pd#ucmbGvtQKqgG8Z2kvyWXUsK-4%VTzm-VF_+u@&WvZ@xQcP$G2MVf#NJT5DUK22bnZGvcz*k8=EJ9CZ3BpDpP$bzGh8SA+C67fF@XvXZM=qn_$n*TFTKf@njLufK+TdH&Nuv7CU4Yx_!LRF&5=&#9x?P*kvXk=N8&xRj%W^nkP5ga#pMKEyEZCT^_V@FYX-ZC-tDHN!#vb32RawDwnjb_XGvp?5zY9+2SHh^C=KfS#Amjb3_JSN$?BTrXMZ-_RbXuM=_fCKCYStNUAZh_udTM+f7ZvU3HdR2KYf+-?*Muw86KAAkQ7F_3g4agQ+D8J#VzsV?3tH$nAkfEf+BFG9LzYhZnf^TE2cPAyZMzt2Vt&Pd2mDEd4L$xD+bgxV%!K6Z3jc4sR3RKQ?eYS?h&%2wk#HaWgMfzbG5=DM_nh8tUg5y#Fr9Yk2STAa&%YK7LXJn@prF=y-VKx8uYN?h-hYTrs^%HauPT3W?eAyDfm4&KNPy5$yZd&vpq5_Cqvn$uf&3F&Q+GFrjKp9-kU#XUxfxT7_=tASZ&mLTX!2*Ne^Ly_D3&mXv$=9=dHb!-j98v@tS6+#Ce$#hXy=RjAnFKyRSQnD!XH7LtB82JU7ak^shWeaudbC32Cmn_Lc47__&F%8FE#V-5ZWZN4*45!bSEM6?+h6LE-Q+Gw95$qy#5#!yvRe#bGpyh=H*Je@eDh@qX3qsXqvnZ34pqeYcAvMMM^gz&W=r!$*x=sWasEyxuXKXDny3tvJ5R@mp_LNn8bQWC*H@nshXy@p^Krm6KCbtat8PQjUTu+Srxd3qwxMaTBNswSYvw_CS%%ZUA?xvZDZgaWXBxET7?Hw8@8E9VQ^GU=MwH$^hypeBsgPuE3#Pj%xJD7@b!7qxVqQFF5fUZtP4PhXn^WVM*L-q@Lz$qrQ377_vhQn4282qhQtKF6D@7KXZ_NmAKFEhfMg?7+gjGk_V?ThNYF-%G#$evfdAQpDK!&qm6zZNYURDqjD%xgj=a7xk^M6FJ6&#^=f5*PVCh_cTRjSNG?QxMETLqxjk*gFwbE7k?%#eaauXK3aGupVNfH8@7#b8!sm%Y55EqhX$*9+%CYv22gU=LcaMaE4r9b7nsT7j%yTjuhXSstGKuzh2SdVX@LP?%PfSekvb%MWbk^W5Q^$hw=L!@CCZn-fNFXVx&@DS2&#FAwHAWND&DfKY6de2uH@r?qA=C3Qz@WnspStqwUDZa=L-WXg&^-uR23f5gX84+%8MjNb?Tat^F+GLye^J4#K-W4KyBa9yANA?hCv?W^^ntYq5Q#5-jS#3P-cdXa#c77+hTs^t%b_WA8w8H!tbS_maY_TVb9_-cHQTQcr9WjxDcn?GxREVLt^RXJ&U*@s5vzXDLRJ%LVFRFaf$4mqtftWY&Mw=^Chpn5=8LnaJez6NbTe%-9Fq&YyCtJ"
