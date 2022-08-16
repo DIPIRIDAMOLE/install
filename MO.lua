@@ -1,8 +1,8 @@
 script_name('MoD-Helper')
 script_authors('Xavier Adamson', 'Frapsy', 'Sergey Parhutik', 'DIPIRIDAMOLE')
 script_description('Ministry of Defence Helper.')
-script_version_number(39)
-script_version("0.3.9")
+script_version_number(40)
+script_version("0.4.0")
 script_properties("work-in-pause")
 
 --memory.fill(sampGetBase() + 0x9D31A, 0x90, 12, true)
@@ -1265,7 +1265,7 @@ function main()
 	update() -- запуск обновлений
 	while not UpdateNahuy do wait(0) end -- пока не проверит обновления тормозим работу
 
-	sampAddChatMessage("[MoD-Helper] {FFFFFF}Скрипт подгружен в игру, версия: {"..u8:decode(Secondcolor.v).."}"..thisScript().version.."{ffffff}, начинаем инициализацию.", SCRIPTCOLOR)
+	sampAddChatMessage("[MoD-Helper] {FFFFFF}Скрипт запущен, версия: {"..u8:decode(Secondcolor.v).."}"..thisScript().version.."{ffffff}.", SCRIPTCOLOR)
 	colorf = imgui.ImFloat3(R, G, B)
 	
 	repeat wait(10) until sampIsLocalPlayerSpawned()
@@ -1283,6 +1283,9 @@ function main()
 	elseif sampGetCurrentServerName():find("Lime")  then -- проверяем подключенный сервер
 		gameServer = "Lime"
 		srv = 4
+		elseif sampGetCurrentServerName():find("Chocolate")  then -- проверяем подключенный сервер
+		gameServer = "Chocolate"
+		srv = 5
 
 	else
 		print("Сервер не допущен, работа скрипта завершена")
@@ -1313,17 +1316,17 @@ function main()
 	while ScriptUse == 3 do wait(0) end -- ожидаем окончания регистрации
 	if ScriptUse == 0 then
 		print("/mn -> 1: Игрок определен как гражданский")
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы определены как {"..u8:decode(Secondcolor.v).."}гражданский{FFFFFF}, функционал откорректирован.", SCRIPTCOLOR)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы определены как {"..u8:decode(Secondcolor.v).."}гражданский{FFFFFF}, активация {"..u8:decode(Secondcolor.v).."}/mod{FFFFFF}.", SCRIPTCOLOR)
 		isPlayerSoldier = false
 	else
 		print("/mn -> 1: Игрок определен как военный")
 		isPlayerSoldier = true
-		sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы определены как {"..u8:decode(Secondcolor.v).."}военный{FFFFFF}, функционал откорректирован.", SCRIPTCOLOR)
+		sampAddChatMessage("[MoD-Helper]{FFFFFF} Вы определены как {"..u8:decode(Secondcolor.v).."}военный{FFFFFF}, активация {"..u8:decode(Secondcolor.v).."}/mod{FFFFFF}.", SCRIPTCOLOR)
 	end
-	sampAddChatMessage("[MoD-Helper]{FFFFFF} Внимание, активна {"..u8:decode(Secondcolor.v).."}локальная{FFFFFF} версия, активация {"..u8:decode(Secondcolor.v).."}/mod{FFFFFF}, разработчик: {"..u8:decode(Secondcolor.v).."}Xavier Adamson.", SCRIPTCOLOR)
+	--sampAddChatMessage("[MoD-Helper]{FFFFFF} Внимание, активна {"..u8:decode(Secondcolor.v).."}локальная{FFFFFF} версия, активация {"..u8:decode(Secondcolor.v).."}/mod{FFFFFF}, разработчик: {"..u8:decode(Secondcolor.v).."}Xavier Adamson.", SCRIPTCOLOR)
 	--sampAddChatMessage("[MoD-Helper]{FFFFFF} Технический модератор в отставке и просто хороший человек - {"..u8:decode(Secondcolor.v).."}Arina Borisova.", SCRIPTCOLOR)
-	sampAddChatMessage("[MoD-Helper]{FFFFFF} Введите {FFCC00}/whatsup{FFFFFF}, чтобы подробнее узнать о нововведениях в {"..u8:decode(Secondcolor.v).."}"..thisScript().version..".", SCRIPTCOLOR)
-	sampAddChatMessage("[MoD-Helper]{FFFFFF} Действующий разработчик скрипта: {"..u8:decode(Secondcolor.v).."}DIPIRIDAMOLE", SCRIPTCOLOR)
+	--sampAddChatMessage("[MoD-Helper]{FFFFFF} Введите {FFCC00}/whatsup{FFFFFF}, чтобы подробнее узнать о нововведениях в {"..u8:decode(Secondcolor.v).."}"..thisScript().version..".", SCRIPTCOLOR)
+	--sampAddChatMessage("[MoD-Helper]{FFFFFF} Действующий разработчик скрипта: {"..u8:decode(Secondcolor.v).."}DIPIRIDAMOLE", SCRIPTCOLOR)
 	
 
 	print("Начинаем инициализацию биндера")
@@ -1450,9 +1453,9 @@ function main()
 	sampRegisterChatCommand("upd", function() if not win_state['player'].v and not win_state['update'].v and not win_state['main'].v then win_state['renew'].v = not win_state['renew'].v end end)
 	print("Регистрация скриптовых команд завершена")
 	
-	if isLocalPlayerSoldier then -- если по стате игрок вояка, то включаем рандом сообщения в чат + инфу о людях из бд грузим
-		random_messages()
-	end
+	--if isLocalPlayerSoldier then -- если по стате игрок вояка, то включаем рандом сообщения в чат + инфу о людях из бд грузим
+	--	random_messages()
+	--end
 	
 	-- используем bass.lua
 	aaudio = bass.BASS_StreamCreateFile(false, "moonloader/MoD-Helper/audio/ad.wav", 0, 0, 0) -- уведомление при включении скрипта
@@ -2243,7 +2246,7 @@ end
 
 function pokaz_obnov()
 	 sampShowDialog(10, "{FFCC00}Что было добавлено в этой версии?", 
-	 '{'..u8:decode(Secondcolor.v)..'}{FFFFFF}Фикс определения статистики персонажа', "{FFFFFF}Закрыть", "", 0)
+	 '{'..u8:decode(Secondcolor.v)..'}{FFFFFF}Фикс шоко', "{FFFFFF}Закрыть", "", 0)
 end
 
 function vigovor(params)
@@ -5252,31 +5255,31 @@ function sampev.onSetCheckpoint(position,radius)
 	end
 end
 
-function random_messages() -- рандомные сообщения
-	lua_thread.create(function()
-		local messages = {
-			{ "Прежде всего помните - вы солдат, помните свою роль и быть может играть станет интересней.", "Не забывайте про субординацию и устав армии, приятной игры." },
-			{ "Если вам понравилась задумка скрипта, но вам чего то не хватает, есть выход!", "Свяжитесь с разработчиком, предложите свою идею, помогите в развитии :)" },
-			{ "В случае возникновения каких либо проблем со скриптом - обратитесь к разработчику.", "Мы стараемся делать работу со скриптом приятной и комфортной для своих пользователей." },
-			{ "Разработчик скрипта выступают против биндерботства и деградации.", "В связи с этим мы используем только незначительные отыгровки, которые никак не влияют на РП процесс." },
-			{ "Участились случаи похищений в нелюдных местах от псевдо агентов ФБР.", "Если вы видите таких - фрапсите и старайтесь уйти от них любой ценой, кроме суицида/оффа, это наказывается." },
-			{ "Если вы заметили грубое нарушение от сослуживца - не нужно молчать.", "Нужно бороться с несоблюдением правил и субординации, помогите нам, внесите свой вклад!" },
-			{ "Ты считаешь, что достоин большего? Ты считаешь, что тебя должны уважать? Ты правда хочешь этого?", "Поднимайте по карьерной лестнице в Мин.Обороны, занимай высокие должности и пробивай свои преграды, как будто их нет!" },
-			{ "Если вы заметили ЧС или подозрительную активность рядом с военными объектами - сообщите!", "Ведь именно ваше сообщение может предупредить сослуживцев о возможной стычке с врагами!"},
-			{ "Помните, при использовании летной техники необходимо соблюдать безопасную от пуль высоту и уметь маневрировать!", "Помимо этого, если вы за штурвалом Apache или Hydra - не применяйте вооружение без приказа высшего командования!" },
-			{ "При использовании рации - будьте адекватны, не оскорбляйте и не провоцируйте людей.", "Если вы хотите покинуть ряды армии - не флудите об этом, быть может вас никто физически не может уволить." },
-			{ "Всегда носите бронежилет, держите при себе патроны и металл, ведь именно они могут вас спасти." }
-		}
-		while true do
-			math.randomseed(os.time())
-			wait(300000)
-			for _, v in pairs(messages[math.random(1, #messages)]) do
-				sampAddChatMessage("[MoD-Helper]{FFFFFF} "..v, SCRIPTCOLOR)
-			end
-			wait(3000000)
-		end
-	end)
-end
+--function random_messages() -- рандомные сообщения
+--	lua_thread.create(function()
+--		local messages = {
+--			{ "Прежде всего помните - вы солдат, помните свою роль и быть может играть станет интересней.", "Не забывайте про субординацию и устав армии, приятной игры." },
+--			{ "Если вам понравилась задумка скрипта, но вам чего то не хватает, есть выход!", "Свяжитесь с разработчиком, предложите свою идею, помогите в развитии :)" },
+--			{ "В случае возникновения каких либо проблем со скриптом - обратитесь к разработчику.", "Мы стараемся делать работу со скриптом приятной и комфортной для своих пользователей." },
+--			{ "Разработчик скрипта выступают против биндерботства и деградации.", "В связи с этим мы используем только незначительные отыгровки, которые никак не влияют на РП процесс." },
+--			{ "Участились случаи похищений в нелюдных местах от псевдо агентов ФБР.", "Если вы видите таких - фрапсите и старайтесь уйти от них любой ценой, кроме суицида/оффа, это наказывается." },
+--			{ "Если вы заметили грубое нарушение от сослуживца - не нужно молчать.", "Нужно бороться с несоблюдением правил и субординации, помогите нам, внесите свой вклад!" },
+--			{ "Ты считаешь, что достоин большего? Ты считаешь, что тебя должны уважать? Ты правда хочешь этого?", "Поднимайте по карьерной лестнице в Мин.Обороны, занимай высокие должности и пробивай свои преграды, как будто их нет!" },
+--			{ "Если вы заметили ЧС или подозрительную активность рядом с военными объектами - сообщите!", "Ведь именно ваше сообщение может предупредить сослуживцев о возможной стычке с врагами!"},
+--			{ "Помните, при использовании летной техники необходимо соблюдать безопасную от пуль высоту и уметь маневрировать!", "Помимо этого, если вы за штурвалом Apache или Hydra - не применяйте вооружение без приказа высшего командования!" },
+--			{ "При использовании рации - будьте адекватны, не оскорбляйте и не провоцируйте людей.", "Если вы хотите покинуть ряды армии - не флудите об этом, быть может вас никто физически не может уволить." },
+--			{ "Всегда носите бронежилет, держите при себе патроны и металл, ведь именно они могут вас спасти." }
+--		}
+--		while true do
+--			math.randomseed(os.time())
+--			wait(300000)
+--			for _, v in pairs(messages[math.random(1, #messages)]) do
+--				sampAddChatMessage("[MoD-Helper]{FFFFFF} "..v, SCRIPTCOLOR)
+--			end
+--			wait(3000000)
+--		end
+--	end)
+--end
 
 function cmd_rd(params) -- доклады в /r чат
 	if params:match("^.*%s.*") then		
